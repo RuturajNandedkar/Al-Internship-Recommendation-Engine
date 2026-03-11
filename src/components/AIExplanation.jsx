@@ -62,7 +62,9 @@ export default function AIExplanation({ reasoning, breakdown, score }) {
               { label: "Field Alignment", value: breakdown.field, icon: "🎓" },
               { label: "Sector Fit", value: breakdown.sector, icon: "🏢" },
               { label: "Location", value: breakdown.location, icon: "📍" },
-              { label: "Work Mode", value: breakdown.mode, icon: "💻" },
+              { label: "Experience Fit", value: breakdown.experience, icon: "📈" },
+              ...(breakdown.growth ? [{ label: "Growth Potential", value: breakdown.growth, icon: "🚀" }] : []),
+              ...(breakdown.mode && !breakdown.growth ? [{ label: "Work Mode", value: breakdown.mode, icon: "💻" }] : []),
             ].map(({ label, value, icon }) => (
               <div key={label} className="flex items-center gap-2.5">
                 <span className="text-xs w-5 text-center">{icon}</span>

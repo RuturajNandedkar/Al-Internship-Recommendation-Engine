@@ -1,7 +1,9 @@
 const { getRecommendations } = require("../services/recommendationService");
+const { enhanceWithAI, isGeminiAvailable } = require("../services/geminiService");
 const Profile = require("../models/Profile");
 const RecommendationHistory = require("../models/RecommendationHistory");
 const asyncHandler = require("../middleware/asyncHandler");
+const logger = require("../utils/logger");
 
 /**
  * @desc    Get internship recommendations for a given profile
@@ -12,50 +14,57 @@ const asyncHandler = require("../middleware/asyncHandler");
 const recommend = asyncHandler(async (req, res) => {
   const { skills, interests, preferred_domain, experience_level, location } = req.body;
 
-  // Save profile to DB for analytics/history
-  const profile = await Profile.create({
+  const profileData = {
     skills,
     interests: interests || [],
     preferred_domain: preferred_domain || "all",
     experience_level,
     location: location || "",
-  });
+  };
 
-  // Generate recommendations using the scoring engine
-  const recommendations = await getRecommendations({
-    skills,
-    interests: interests || [],
-    preferred_domain: preferred_domain || "all",
-    experience_level,
-  });
+  // Save profile to DB for analytics/history
+  const profile = await Profile.create(profileData);
+
+  // Step 1: Generate recommendations using the algorithmic scoring engine
+  const recommendations = await getRecommendations(profileData);
+
+  // Step 2: Enhance with Gemini AI if available
+  let finalRecommendations = recommendations;
+  let aiUsed = false;
+
+  if (isGeminiAvailable()) {
+    const aiEnhanced = await enhanceWithAI(profileData, recommendations);
+    if (aiEnhanced && aiEnhanced.length > 0) {
+      finalRecommendations = aiEnhanced;
+      aiUsed = true;
+      logger.info("Recommendations enhanced with Gemini AI");
+    } else {
+      logger.info("Gemini AI enhancement returned no results, using algorithmic scoring");
+    }
+  }
 
   // Track in recommendation history if user is authenticated
   if (req.user) {
     await RecommendationHistory.create({
       userId: req.user._id,
-      profileSnapshot: {
-        skills,
-        interests: interests || [],
-        preferred_domain: preferred_domain || "all",
-        experience_level,
-        location: location || "",
-      },
-      recommendations: recommendations.slice(0, 10).map((r) => ({
+      profileSnapshot: profileData,
+      recommendations: finalRecommendations.slice(0, 10).map((r) => ({
         internshipId: r._id,
         title: r.title,
         company: r.company,
         score: r.score,
         reasoning: r.reasoning || "",
       })),
-      source: "backend",
+      source: aiUsed ? "ai-gemini" : "backend",
     });
   }
 
   res.status(200).json({
     success: true,
     profileId: profile._id,
-    count: recommendations.length,
-    data: recommendations,
+    count: finalRecommendations.length,
+    aiUsed,
+    data: finalRecommendations,
   });
 });
 

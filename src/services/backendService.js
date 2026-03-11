@@ -119,11 +119,16 @@ function transformBackendResult(item, index) {
     icon: domainIcon(internship.domain),
     score: Math.round(internship.score || 0),
     reasoning: internship.reasoning || "",
+    matchedSkills: internship.matchedSkills || [],
+    missingSkills: internship.missingSkills || [],
+    aiEnhanced: internship.aiEnhanced || false,
     breakdown: {
-      skills: Math.round((breakdown.skill_match || 0) * 100),
-      field: Math.round((breakdown.domain_match || 0) * 100),
-      sector: Math.round((breakdown.interest_match || 0) * 100),
-      location: 50,
+      skills: Math.round((breakdown.skill_match || 0)),
+      field: Math.round((breakdown.domain_match || 0)),
+      sector: Math.round((breakdown.interest_match || 0)),
+      location: Math.round((breakdown.location_match || 0)),
+      experience: Math.round((breakdown.experience_fit || 0)),
+      growth: Math.round((breakdown.growth_potential || 0)),
       mode: 50,
     },
   };
@@ -161,7 +166,12 @@ export async function getBackendRecommendations(formData) {
     throw new Error("Unexpected response format from backend");
   }
 
-  return json.data.map(transformBackendResult);
+  const results = json.data.map(transformBackendResult);
+
+  // Attach AI usage flag from backend response
+  results._aiUsed = !!json.aiUsed;
+
+  return results;
 }
 
 /**

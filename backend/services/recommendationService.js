@@ -373,17 +373,43 @@ async function getRecommendations(profile, maxResults = 5) {
  */
 function generateReasoning(internship, breakdown, matched, missing) {
   const parts = [];
+
+  // Skills analysis
   if (breakdown.skill_match >= 70) {
-    parts.push(`Strong skill alignment — you match ${matched.length} of ${matched.length + missing.length} required skills`);
+    parts.push(`Strong skill alignment — you match ${matched.length} of ${matched.length + missing.length} required skills (${matched.join(", ")})`);
   } else if (breakdown.skill_match >= 40) {
-    parts.push(`Partial skill match — ${matched.length} skills overlap, consider learning ${missing.slice(0, 2).join(", ")}`);
+    parts.push(`You have ${matched.length} matching skills (${matched.join(", ")}). To strengthen your candidacy, consider learning ${missing.slice(0, 3).join(", ")}`);
+  } else if (matched.length > 0) {
+    parts.push(`You have some relevant skills (${matched.join(", ")}), and this role would help you develop ${missing.slice(0, 2).join(", ")}`);
   }
-  if (breakdown.domain_match >= 80) parts.push(`directly in your preferred domain`);
-  if (breakdown.location_match >= 80) parts.push(`location aligns with your preference`);
-  if (breakdown.experience_fit >= 80) parts.push(`complexity suits your experience level`);
-  return parts.length > 0
-    ? parts.join("; ") + "."
-    : `Exploratory match — this ${internship.domain} role could broaden your skills.`;
+
+  // Domain analysis
+  if (breakdown.domain_match >= 80) {
+    parts.push(`This ${internship.domain} role directly aligns with your preferred domain`);
+  } else if (breakdown.domain_match >= 50) {
+    parts.push(`This ${internship.domain} role is closely related to your area of interest`);
+  }
+
+  // Location
+  if (breakdown.location_match >= 80) {
+    parts.push(`the location (${internship.location}) matches your preference`);
+  }
+
+  // Experience fit
+  if (breakdown.experience_fit >= 80) {
+    parts.push(`the role's complexity is well-suited for your experience level`);
+  }
+
+  // Growth opportunity
+  if (missing.length > 0 && missing.length <= 3) {
+    parts.push(`Great growth opportunity — you'd gain experience in ${missing.join(", ")}`);
+  }
+
+  if (parts.length === 0) {
+    return `This ${internship.domain} role at ${internship.company} could broaden your skillset and introduce you to new technologies in the ${internship.domain} space.`;
+  }
+
+  return parts.join(". ") + ".";
 }
 
 module.exports = { getRecommendations, buildIDF, cosineSim, computeSkillScore };

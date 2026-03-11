@@ -35,12 +35,12 @@ export default function HomePage() {
     setUserSkills(resolveSkillNames(profile.skills));
     window.scrollTo({ top: 0, behavior: "smooth" });
 
-    // 1. Try backend API first
+    // 1. Try backend API first (uses AI enhancement if Gemini is configured on backend)
     try {
       const backendResults = await getBackendRecommendations(profile);
       if (backendResults && backendResults.length > 0) {
         setResults(backendResults);
-        setAiUsed(true);
+        setAiUsed(!!backendResults._aiUsed);
         setLoading(false);
         return;
       }
