@@ -1,0 +1,25 @@
+controllers/internshipController.ts(53,35): error TS7030: Not all code paths return a value.
+controllers/recommendationController.ts(38,57): error TS2345: Argument of type 'RecommendationResult[]' is not assignable to parameter of type 'InternshipInput[]'.
+  Type 'RecommendationResult' is not assignable to type 'InternshipInput'.
+    Property '_id' is optional in type 'RecommendationResult' but required in type 'InternshipInput'.
+controllers/recommendationController.ts(40,7): error TS2322: Type 'EnhancedInternship[]' is not assignable to type 'RecommendationResult[]'.
+  Property 'confidence' is missing in type 'EnhancedInternship' but required in type 'RecommendationResult'.
+controllers/resumeController.ts(3,22): error TS7016: Could not find a declaration file for module 'pdf-parse'. 'E:/New project/al-internship-recommendation-engine/backend/node_modules/pdf-parse/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/pdf-parse` if it exists or add a new declaration (.d.ts) file containing `declare module 'pdf-parse';`
+middleware/auth.ts(91,14): error TS2769: No overload matches this call.
+  Overload 1 of 5, '(payload: string | object | Buffer<ArrayBufferLike>, secretOrPrivateKey: null, options?: (SignOptions & { algorithm: "none"; }) | undefined): string', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type 'null'.
+  Overload 2 of 5, '(payload: string | object | Buffer<ArrayBufferLike>, secretOrPrivateKey: Buffer<ArrayBufferLike> | Secret | JsonWebKeyInput | PrivateKeyInput, options?: SignOptions | undefined): string', gave the following error.
+    Type 'string' is not assignable to type 'number | StringValue | undefined'.
+  Overload 3 of 5, '(payload: string | object | Buffer<ArrayBufferLike>, secretOrPrivateKey: Buffer<ArrayBufferLike> | Secret | JsonWebKeyInput | PrivateKeyInput, callback: SignCallback): void', gave the following error.
+    Object literal may only specify known properties, and 'expiresIn' does not exist in type 'SignCallback'.
+middleware/validateRequest.ts(8,32): error TS7030: Not all code paths return a value.
+models/User.ts(13,18): error TS2320: Interface 'IUser' cannot simultaneously extend types 'Document<ObjectId, any, any, Record<string, any>, {}>' and 'IUserMethods'.
+  Named property 'toJSON' of types 'Document<ObjectId, any, any, Record<string, any>, {}>' and 'IUserMethods' are not identical.
+routes/aiRecommendationRoutes.ts(9,32): error TS7030: Not all code paths return a value.
+routes/authRoutes.ts(9,32): error TS7030: Not all code paths return a value.
+routes/dashboardRoutes.ts(14,32): error TS7030: Not all code paths return a value.
+routes/skillGapRoutes.ts(8,32): error TS7030: Not all code paths return a value.
+server.ts(61,12): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type 'string' is not assignable to parameter of type 'FormatFn<Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>, Response<any, Record<string, any>>>'.

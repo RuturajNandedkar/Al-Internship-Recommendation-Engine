@@ -1,0 +1,35 @@
+pages/DashboardPage.tsx(11,3): error TS2724: '"../services/dashboardService"' has no exported member named 'SavedInternship'. Did you mean 'saveInternship'?
+pages/DashboardPage.tsx(12,3): error TS2724: '"../services/dashboardService"' has no exported member named 'RecommendationHistory'. Did you mean 'RecommendationHistoryItem'?
+pages/DashboardPage.tsx(13,3): error TS2305: Module '"../services/dashboardService"' has no exported member 'ResumeUploadResult'.
+pages/DashboardPage.tsx(277,38): error TS2339: Property 'stats' does not exist on type 'DashboardStats'.
+pages/DashboardPage.tsx(282,38): error TS2339: Property 'stats' does not exist on type 'DashboardStats'.
+pages/DashboardPage.tsx(287,38): error TS2339: Property 'stats' does not exist on type 'DashboardStats'.
+pages/DashboardPage.tsx(292,41): error TS2339: Property 'stats' does not exist on type 'DashboardStats'.
+pages/DashboardPage.tsx(293,37): error TS2339: Property 'stats' does not exist on type 'DashboardStats'.
+pages/DashboardPage.tsx(294,40): error TS2339: Property 'stats' does not exist on type 'DashboardStats'.
+pages/DashboardPage.tsx(302,97): error TS2339: Property 'stats' does not exist on type 'DashboardStats'.
+pages/DashboardPage.tsx(304,49): error TS2339: Property 'stats' does not exist on type 'DashboardStats'.
+pages/DashboardPage.tsx(304,98): error TS2339: Property 'stats' does not exist on type 'DashboardStats'.
+pages/DashboardPage.tsx(304,152): error TS2339: Property 'stats' does not exist on type 'DashboardStats'.
+pages/DashboardPage.tsx(305,30): error TS2339: Property 'stats' does not exist on type 'DashboardStats'.
+pages/DashboardPage.tsx(311,28): error TS2339: Property 'analytics' does not exist on type 'DashboardStats'.
+pages/DashboardPage.tsx(314,32): error TS2339: Property 'analytics' does not exist on type 'DashboardStats'.
+pages/DashboardPage.tsx(314,74): error TS2339: Property 'analytics' does not exist on type 'DashboardStats'.
+pages/DashboardPage.tsx(316,55): error TS2339: Property 'analytics' does not exist on type 'DashboardStats'.
+pages/DashboardPage.tsx(321,32): error TS2339: Property 'analytics' does not exist on type 'DashboardStats'.
+pages/DashboardPage.tsx(321,66): error TS2339: Property 'analytics' does not exist on type 'DashboardStats'.
+pages/DashboardPage.tsx(323,58): error TS2339: Property 'analytics' does not exist on type 'DashboardStats'.
+pages/DashboardPage.tsx(325,103): error TS2339: Property 'analytics' does not exist on type 'DashboardStats'.
+pages/DashboardPage.tsx(333,28): error TS2339: Property 'topSkills' does not exist on type 'DashboardStats'.
+pages/DashboardPage.tsx(333,51): error TS2339: Property 'topSkills' does not exist on type 'DashboardStats'.
+pages/DashboardPage.tsx(337,34): error TS2339: Property 'topSkills' does not exist on type 'DashboardStats'.
+pages/DashboardPage.tsx(337,49): error TS7006: Parameter 's' implicitly has an 'any' type.
+pages/DashboardPage.tsx(351,28): error TS2339: Property 'recentSearches' does not exist on type 'DashboardStats'.
+pages/DashboardPage.tsx(351,56): error TS2339: Property 'recentSearches' does not exist on type 'DashboardStats'.
+pages/DashboardPage.tsx(355,34): error TS2339: Property 'recentSearches' does not exist on type 'DashboardStats'.
+pages/DashboardPage.tsx(355,54): error TS7006: Parameter 's' implicitly has an 'any' type.
+pages/DashboardPage.tsx(462,64): error TS7006: Parameter 'r' implicitly has an 'any' type.
+pages/DashboardPage.tsx(462,67): error TS7006: Parameter 'i' implicitly has an 'any' type.
+pages/DashboardPage.tsx(556,66): error TS7006: Parameter 's' implicitly has an 'any' type.
+pages/DashboardPage.tsx(574,69): error TS7006: Parameter 'r' implicitly has an 'any' type.
+pages/DashboardPage.tsx(574,72): error TS7006: Parameter 'i' implicitly has an 'any' type.
