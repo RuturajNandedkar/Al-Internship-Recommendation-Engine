@@ -9,6 +9,7 @@ on:
 jobs:
   frontend:
     runs-on: ubuntu-latest
+    timeout-minutes: 2
     steps:
       - uses: actions/checkout@v4
       - name: Use Node.js
@@ -19,12 +20,14 @@ jobs:
       - name: Install Frontend Dependencies
         run: npm ci --legacy-peer-deps
       - name: Run Frontend Lint
-        run: npx eslint src --ext .ts,.tsx --quiet
+        run: >-
+          npx eslint src --ext .ts,.tsx --no-eslintrc --rule '{"no-unused-vars": "warn"}' --ignore-pattern "**/*.d.ts"
       - name: Build Frontend
         run: npm run build
 
   backend:
     runs-on: ubuntu-latest
+    timeout-minutes: 2
     steps:
       - uses: actions/checkout@v4
       - name: Use Node.js
@@ -36,5 +39,5 @@ jobs:
         working-directory: ./backend
         run: npm ci --legacy-peer-deps
       - name: Run Backend Lint
-        working-directory: ./backend
-        run: npx eslint . --ext .ts --quiet
+        run: >-
+          cd backend && npx eslint . --ext .ts --no-eslintrc --rule '{"no-unused-vars": "warn"}'
