@@ -4,12 +4,14 @@
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![React](https://img.shields.io/badge/React-18-61dafb.svg)
-![Node.js](https://img.shields.io/badge/Node.js-Express-339933.svg)
-![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248.svg)
+![TypeScript](https://img.shields.io/badge/TypeScript-6-3178c6.svg)
+![Node.js](https://img.shields.io/badge/Node.js-20-339933.svg)
+![MongoDB](https://img.shields.io/badge/MongoDB-7-47A248.svg)
+![Redis](https://img.shields.io/badge/Redis-7-dc382d.svg)
 ![Vite](https://img.shields.io/badge/Vite-6-646cff.svg)
 ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3-38bdf8.svg)
 ![Gemini AI](https://img.shields.io/badge/Gemini_AI-2.0_Flash-4285f4.svg)
-![OpenAI](https://img.shields.io/badge/OpenAI-GPT--3.5-412991.svg)
+![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o-412991.svg)
 
 ---
 
@@ -31,8 +33,9 @@
 
 ## ✨ Features
 
-### 🤖 AI Recommendation Engine
-- **TF-IDF Cosine Similarity** scoring with multi-factor weighted matching
+### 🤖 AI Recommendation Engine (v2.0)
+- **TF-IDF Term Weighting** combined with **Cosine Similarity** for high-precision matching
+- **Redis Caching** layer for instantaneous recommendation retrieval
 - **6-factor scoring**: Skills (40%), Domain (20%), Interest (15%), Location (10%), Experience (10%), Recency (5%)
 - **Skill synonym resolution** — "js" matches "JavaScript", "k8s" matches "Kubernetes"
 - **Confidence scoring** based on profile completeness and score consistency
@@ -56,14 +59,14 @@
 - Industry insights: trending skills, market demand, hiring companies
 - Priority ranking: Critical → High → Medium → Low
 
-### 📈 Personalized Dashboard
-- Profile completeness tracking with progress bar
-- **Domain distribution analytics** — visual breakdown of search patterns
-- **Match score trend chart** — track improvement over time
-- Top skills frequency analysis
-- Saved internships management
-- Paginated recommendation history
-- Resume upload with instant analysis
+### 📈 Personalized Dashboard & UX
+- **Performance-first UI**: Skeleton loading states and smooth transitions
+- **Error Resilience**: React ErrorBoundary and robust error handling
+- **Guided Onboarding**: Interactive first-time user walkthrough
+- **Global Search**: Paginated and filtered internship discovery
+- **Analytics**: Profile completeness, domain distribution, and match trend charts
+- **Feedback Loop**: Rate recommendations to improve engine accuracy
+- **Resume Hub**: Instant PDF parsing and skill extraction
 
 ### 🗄️ Internship Dataset
 - **50 real-world internships** from top companies (Google, Microsoft, Netflix, OpenAI, Stripe, etc.)
@@ -71,16 +74,13 @@
 - **12 domains**: AI, Web Dev, Mobile, Data Science, Cloud, DevOps, Cybersecurity, Blockchain, IoT, ML, UI/UX, Game Dev
 - Detailed descriptions, required skills, stipends, and durations
 
-### 🏗️ API Architecture
-- RESTful API with **8 route groups** and 20+ endpoints
-- Interactive **API documentation** at `/api/docs`
-- **Health monitoring** at `/api/health` (DB status, memory, uptime)
-- JWT authentication with role-based authorization
-- **3-tier rate limiting**: General (100/15min), Auth (20/15min), AI (10/15min)
-- Input validation with express-validator
-- Structured error handling with custom AppError class
-- Winston logging (console + file)
-- Helmet security headers + CORS protection
+### 🏗️ Backend Infrastructure
+- **TypeScript Core**: Full type safety across controllers, services, and middleware
+- **Adzuna API Integration**: Automated script to fetch and sync real-world internships
+- **Redis & BullMQ**: Scalable background processing and caching
+- **Health monitoring**: Advanced system diagnostics at `/api/health`
+- **Security**: 3-tier rate limiting, JWT auth, and helmet headers
+- **Observability**: Winston logging with environment-specific rotation
 
 ### 🌐 Additional Features
 - **Multi-language support**: English, Hindi (हिन्दी), Tamil (தமிழ்)
@@ -95,25 +95,23 @@
 ### Frontend
 | Technology | Purpose |
 |------------|----------|
-| **React 18** | UI framework with hooks & context |
-| **Vite 6** | Build tool & HMR dev server |
+| **React 18 + TS** | UI framework with TypeScript safety |
+| **Vite 6** | Modern build tool & HMR dev server |
 | **Tailwind CSS 3** | Utility-first responsive styling |
-| **React Router 6** | Client-side routing & protected routes |
-| **Google Gemini AI** | Client-side AI matching (2.0 Flash) |
-| **Recharts-style Charts** | Dashboard analytics visualization |
+| **Framer Motion** | Advanced animations and transitions |
+| **Google Gemini AI** | Client-side fallback matching (2.0 Flash) |
+| **Recharts** | Data visualization for student analytics |
 
 ### Backend
 | Technology | Purpose |
 |------------|----------|
-| **Node.js + Express** | REST API server |
-| **MongoDB + Mongoose** | NoSQL database with ODM |
-| **OpenAI GPT-3.5 Turbo** | Server-side AI for resume & skill analysis |
-| **JWT (jsonwebtoken)** | Stateless authentication |
-| **Multer + pdf-parse** | Resume PDF upload & text extraction |
-| **Winston** | Structured logging (console + file) |
-| **Helmet + CORS** | Security headers & cross-origin config |
-| **express-rate-limit** | API rate limiting (3-tier) |
-| **express-validator** | Request input validation |
+| **Node.js 20** | Runtime with ESM and modern JS support |
+| **Express + TS** | Core API with `AuthRequest` type safety |
+| **MongoDB 7** | Primary NoSQL database with optimized indexes |
+| **Redis 7** | High-performance caching and task orchestration |
+| **BullMQ** | Reliable background job management |
+| **OpenAI GPT-4o** | Advanced resume parsing and skill analysis |
+| **Multer + PDF-parse**| Document processing pipeline |
 
 ---
 
@@ -161,74 +159,31 @@ Education level acts as a **multiplier** for qualification matching.
 
 ```
 al-internship-recommendation-engine/
-├── src/                            # ── FRONTEND ──
+├── src/                            # ── FRONTEND (TypeScript) ──
 │   ├── components/
-│   │   ├── Header.jsx              # Nav bar with language selector
-│   │   ├── CandidateForm.jsx       # 3-step profile input form
-│   │   ├── RecommendationCard.jsx  # Result card with AI insight
-│   │   ├── RecommendationList.jsx  # Results container
-│   │   ├── SkillGapSuggestions.jsx # Skill gap visualizer
-│   │   ├── AIExplanation.jsx       # AI reasoning display
-│   │   ├── MatchPercentageRing.jsx # Animated score ring
-│   │   ├── ProtectedRoute.jsx      # Auth route guard
-│   │   ├── ApiKeySetup.jsx         # Gemini API key configuration
-│   │   ├── LearningResources.jsx   # Learning resource suggestions
-│   │   ├── StepIndicator.jsx       # Multi-step form indicator
-│   │   └── Footer.jsx              # Page footer
-│   ├── pages/
-│   │   ├── HomePage.jsx            # Landing + recommendation flow
-│   │   ├── DashboardPage.jsx       # Analytics dashboard (4 tabs)
-│   │   ├── LoginPage.jsx           # JWT login
-│   │   ├── SignupPage.jsx          # User registration
-│   │   └── SkillGapPage.jsx        # Skill gap analysis page
-│   ├── context/AuthContext.jsx     # Auth state management
-│   ├── services/
-│   │   ├── aiService.js            # Gemini AI integration
-│   │   ├── backendService.js       # Backend API client
-│   │   └── dashboardService.js     # Dashboard API client
-│   ├── engine/recommendationEngine.js  # Local fallback algorithm
-│   └── data/
-│       ├── internships.js          # Client-side internship data
-│       └── translations.js         # i18n (EN, HI, TA)
+│   │   ├── SkeletonCard.tsx        # Loading placeholders
+│   │   ├── ErrorBoundary.tsx       # Robust error handling
+│   │   ├── OnboardingModal.tsx     # First-time user guide
+│   │   ├── RecommendationCard.tsx  # Result card with AI insight
+│   │   └── ...
+│   ├── pages/                      # Dashboard, HomePage, SkillGapPage
+│   ├── services/                   # Gemini AI and API clients
+│   └── main.tsx                    # React entry point
 │
-├── backend/                        # ── BACKEND ──
-│   ├── server.js                   # Express app entry point
-│   ├── config/db.js                # MongoDB connection
-│   ├── controllers/
-│   │   ├── authController.js       # Register/Login/JWT
-│   │   ├── recommendationController.js  # Recommendation API
-│   │   ├── aiRecommendationController.js # AI-enhanced recs
-│   │   ├── resumeController.js     # Resume upload & parse
-│   │   ├── profileController.js    # User profile CRUD
-│   │   ├── dashboardController.js  # Dashboard analytics
-│   │   ├── skillGapController.js   # Skill gap analysis
-│   │   └── internshipController.js # Internship CRUD
-│   ├── services/
-│   │   ├── recommendationService.js # TF-IDF + cosine similarity engine
-│   │   ├── resumeService.js        # PDF parsing + skill extraction
-│   │   ├── skillGapService.js      # AI + rule-based gap analysis
-│   │   └── openaiService.js        # OpenAI GPT integration
-│   ├── models/                     # Mongoose schemas
-│   │   ├── User.js, Profile.js, Internship.js
-│   │   ├── RecommendationHistory.js
-│   │   └── SavedRecommendation.js
-│   ├── middleware/
-│   │   ├── auth.js                 # JWT verification
-│   │   ├── errorHandler.js         # Global error handler
-│   │   ├── validateRequest.js      # Input validation
-│   │   └── asyncHandler.js         # Async error wrapper
-│   ├── routes/                     # 8 route groups
-│   ├── data/sampleInternships.json # 50 seed internships
-│   └── utils/
-│       ├── AppError.js             # Custom error class
-│       ├── logger.js               # Winston logger
-│       └── seedData.js             # Database seeder
+├── backend/                        # ── BACKEND (TypeScript) ──
+│   ├── server.ts                   # Express server entry
+│   ├── controllers/                # Request handlers
+│   ├── services/                   # Multi-tier recommendation logic
+│   ├── models/                     # Mongoose/TypeScript schemas
+│   ├── middleware/                 # AuthRequest and validation logic
+│   ├── types/                      # Shared TS interfaces
+│   ├── queues/                     # BullMQ worker configurations
+│   ├── config/                     # Redis and Database config
+│   └── scripts/                    # fetchInternships.js (Adzuna)
 │
-├── DEPLOYMENT.md                   # Full deployment guide
-├── package.json                    # Frontend dependencies
-├── vite.config.js
-├── tailwind.config.js
-└── .env.example
+├── docker-compose.yml              # Full-stack orchestration
+├── Dockerfile                      # Frontend production build
+└── .env.example                    # Configuration template
 ```
 
 ---
@@ -289,25 +244,32 @@ cd ..
 **Frontend** — create `.env` in the project root:
 ```env
 VITE_GEMINI_API_KEY=your_gemini_api_key_here
-VITE_BACKEND_URL=http://localhost:5000
+VITE_BACKEND_URL=http://localhost:5000/api
 ```
 
 **Backend** — create `backend/.env`:
 ```env
-MONGODB_URI=mongodb://localhost:27017/internship-engine
+MONGODB_URI=mongodb://localhost:27017/internship-recommendation
+REDIS_URL=redis://localhost:6379
 JWT_SECRET=your_jwt_secret_key_here
-OPENAI_API_KEY=your_openai_api_key_here   # Optional
+OPENAI_API_KEY=your_openai_api_key_here
+ADZUNA_APP_ID=your_adzuna_app_id
+ADZUNA_API_KEY=your_adzuna_api_key
 PORT=5000
 NODE_ENV=development
 ```
 
 > **Note:** The app works without API keys — it falls back to rule-based algorithms. AI features are optional but recommended.
 
-### 3. Seed the Database
+### 3. Initialize Data & Integration
 
 ```bash
 cd backend
+# Seed initial 50 internships
 npm run seed
+
+# Optional: Fetch real-time internships from Adzuna
+node scripts/fetchInternships.js
 ```
 
 This loads **50 internships** from `sampleInternships.json` into MongoDB.
@@ -376,12 +338,13 @@ GET /api/health  → Server health + DB status
 |--------|----------|------|-------------|
 | POST | `/api/auth/register` | No | User registration |
 | POST | `/api/auth/login` | No | JWT login |
-| GET | `/api/internships` | No | List internships (paginated) |
-| POST | `/api/recommendations` | Yes | Get AI recommendations |
+| GET | `/api/internships` | No | List internships (paginated/filtered) |
+| POST | `/api/recommendations` | Yes | Get AI recommendations (v2.0) |
 | POST | `/api/resume/upload` | Yes | Upload & parse resume PDF |
 | GET | `/api/skill-gap/analyze` | Yes | Skill gap analysis |
-| GET | `/api/dashboard` | Yes | Dashboard analytics |
+| GET | `/api/dashboard` | Yes | Dashboard analytics & trends |
 | POST | `/api/dashboard/save` | Yes | Save recommendation |
+| POST | `/api/dashboard/feedback`| Yes | Submit recommendation feedback |
 
 > See [backend/API_DOCUMENTATION.md](backend/API_DOCUMENTATION.md) for the complete API reference.
 
@@ -397,9 +360,9 @@ GET /api/health  → Server health + DB status
 
 ### Tuning Recommendation Weights
 
-**Backend** — Edit `backend/services/recommendationService.js`:
-```javascript
-const WEIGHTS = {
+**Backend** — Edit `backend/services/recommendationService.ts`:
+```typescript
+const WEIGHTS: ScoringWeights = {
   skill: 0.40, domain: 0.20, interest: 0.15,
   location: 0.10, experience: 0.10, recency: 0.05
 };
@@ -415,16 +378,16 @@ const WEIGHTS = {
 
 ### Adding Skill Synonyms
 
-Edit `SKILL_SYNONYMS` in `backend/services/recommendationService.js`:
-```javascript
-const SKILL_SYNONYMS = {
+Edit `SKILL_SYNONYMS` in `backend/services/recommendationService.ts`:
+```typescript
+const SKILL_SYNONYMS: Record<string, string> = {
   js: 'javascript', ts: 'typescript', k8s: 'kubernetes', ...
 };
 ```
 
 ### Adding Domain Skill Requirements
 
-Edit `DOMAIN_REQUIREMENTS` in `backend/services/skillGapService.js` to add new domains or update skill tiers (core → intermediate → advanced).
+Edit `DOMAIN_REQUIREMENTS` in `backend/services/skillGapService.ts` to add new domains or update skill tiers (core → intermediate → advanced).
 
 ### Adding Languages
 
