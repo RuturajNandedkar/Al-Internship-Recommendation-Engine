@@ -10,8 +10,33 @@ interface RecommendationCardProps {
   t: TranslationContent;
 }
 
+type FeedbackState = "up" | "down" | null;
+
+/** POST thumbs feedback to the backend. Fire-and-forget. */
+async function postFeedback(id: string, helpful: boolean): Promise<void> {
+  try {
+    await fetch(`/api/recommendations/${id}/feedback`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ helpful }),
+    });
+  } catch (err) {
+    console.warn("[Feedback] Could not reach backend:", err);
+  }
+}
+
 export default function RecommendationCard({ internship, rank, t }: RecommendationCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const [feedback, setFeedback] = useState<FeedbackState>(null);
+  const [feedbackSent, setFeedbackSent] = useState(false);
+
+  const handleFeedback = async (helpful: boolean) => {
+    if (feedbackSent) return;
+    const next: FeedbackState = helpful ? "up" : "down";
+    setFeedback(next);
+    setFeedbackSent(true);
+    await postFeedback(String(internship.id), helpful);
+  };
 
   const rankStyles =
     rank === 1
@@ -157,6 +182,45 @@ export default function RecommendationCard({ internship, rank, t }: Recommendati
             )}
           </div>
         )}
+      </div>
+
+      {/* ── Thumbs Feedback Bar ── */}
+      <div
+        className="px-6 sm:px-7 py-4 border-t border-gray-100/80 flex items-center justify-between"
+        style={{ background: 'rgba(248, 250, 252, 0.6)' }}
+      >
+        <span className="text-xs text-gray-400 font-semibold">
+          {feedbackSent ? "Thanks for your feedback!" : "Was this helpful?"}
+        </span>
+
+        <div className="flex items-center gap-2">
+          <button
+            id={`feedback-up-${internship.id}`}
+            onClick={() => handleFeedback(true)}
+            disabled={feedbackSent}
+            title="Helpful"
+            className={`w-9 h-9 rounded-xl flex items-center justify-center text-base transition-all duration-200 font-medium
+              ${feedback === "up"
+                ? "bg-emerald-100 text-emerald-600 scale-110 shadow-sm"
+                : "bg-gray-100 text-gray-400 hover:bg-emerald-50 hover:text-emerald-500 hover:scale-105"}
+              ${feedbackSent ? "cursor-default opacity-70" : "cursor-pointer"}`}
+          >
+            👍
+          </button>
+          <button
+            id={`feedback-down-${internship.id}`}
+            onClick={() => handleFeedback(false)}
+            disabled={feedbackSent}
+            title="Not helpful"
+            className={`w-9 h-9 rounded-xl flex items-center justify-center text-base transition-all duration-200 font-medium
+              ${feedback === "down"
+                ? "bg-red-100 text-red-500 scale-110 shadow-sm"
+                : "bg-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-400 hover:scale-105"}
+              ${feedbackSent ? "cursor-default opacity-70" : "cursor-pointer"}`}
+          >
+            👎
+          </button>
+        </div>
       </div>
     </div>
   );

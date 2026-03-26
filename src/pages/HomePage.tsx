@@ -6,6 +6,9 @@ import CandidateForm from "../components/CandidateForm.tsx";
 import RecommendationList from "../components/RecommendationList.tsx";
 import ApiKeySetup from "../components/ApiKeySetup.tsx";
 import Footer from "../components/Footer.tsx";
+import SkeletonCard from "../components/SkeletonCard.tsx";
+import ErrorBoundary from "../components/ErrorBoundary.tsx";
+import OnboardingModal from "../components/OnboardingModal.tsx";
 import { translations, skillKeyMap, TranslationContent } from "../data/translations.ts";
 import { getRecommendations } from "../engine/recommendationEngine";
 import { getAIRecommendations, isAIAvailable, CandidateProfile, FrontendRecommendation } from "../services/aiService";
@@ -138,36 +141,32 @@ export default function HomePage() {
               <CandidateForm t={t} onSubmit={handleSubmit} />
             </div>
           </div>
-        ) : loading ? (
-          <div className="flex flex-col items-center justify-center py-28 animate-fadeIn">
-            <div className="relative">
-              <div className="w-24 h-24 rounded-full animate-spin" style={{ border: '4px solid #e0e7ff', borderTopColor: '#6366f1' }} />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-3xl animate-pulse-soft">🤖</span>
-              </div>
-            </div>
-            <p className="mt-8 text-gray-800 font-bold text-xl tracking-tight">{t.aiAnalyzing}</p>
-            <p className="mt-2 text-gray-400 text-sm font-medium">{t.aiAnalyzingSubtext}</p>
-            <div className="mt-8 flex gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-full animate-bounce" style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', animationDelay: '0ms' }} />
-              <div className="w-2.5 h-2.5 rounded-full animate-bounce" style={{ background: 'linear-gradient(135deg, #8b5cf6, #a855f7)', animationDelay: '150ms' }} />
-              <div className="w-2.5 h-2.5 rounded-full animate-bounce" style={{ background: 'linear-gradient(135deg, #a855f7, #6366f1)', animationDelay: '300ms' }} />
-            </div>
-          </div>
         ) : (
-          <div className="animate-slideUp">
-            <RecommendationList
-              results={results || []}
-              t={t}
-              onReset={handleReset}
-              aiUsed={aiUsed}
-              userSkills={userSkills}
-            />
-          </div>
+          <ErrorBoundary>
+            {loading ? (
+              <div className="space-y-5 animate-fadeIn">
+                <p className="text-center text-sm font-semibold text-gray-400 mb-2">{t.aiAnalyzing}</p>
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
+              </div>
+            ) : (
+              <div className="animate-slideUp">
+                <RecommendationList
+                  results={results || []}
+                  t={t}
+                  onReset={handleReset}
+                  aiUsed={aiUsed}
+                  userSkills={userSkills}
+                />
+              </div>
+            )}
+          </ErrorBoundary>
         )}
       </main>
 
       <Footer t={t} />
+      <OnboardingModal />
     </div>
   );
 }
