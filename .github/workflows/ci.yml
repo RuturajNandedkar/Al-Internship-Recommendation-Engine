@@ -24,7 +24,7 @@ jobs:
         cache: 'npm'
 
     - name: Install Frontend Dependencies
-      run: npm install
+      run: npm install --legacy-peer-deps
 
     - name: Run Frontend Lint
       run: npm run lint
@@ -38,7 +38,7 @@ jobs:
 
     - name: Install Backend Dependencies
       working-directory: ./backend
-      run: npm install
+      run: npm install --legacy-peer-deps
 
     - name: Run Backend Lint
       working-directory: ./backend
