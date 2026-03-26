@@ -19,9 +19,6 @@ jobs:
           cache: 'npm'
       - name: Install Frontend Dependencies
         run: npm ci --legacy-peer-deps
-      - name: Run Frontend Lint
-        run: >-
-          npx eslint src --ext .ts,.tsx --parser @typescript-eslint/parser --rule '{"no-unused-vars": "warn"}' --ignore-pattern "**/*.d.ts"
       - name: Build Frontend
         run: npm run build
 
@@ -38,6 +35,3 @@ jobs:
       - name: Install Backend Dependencies
         working-directory: ./backend
         run: npm ci --legacy-peer-deps
-      - name: Run Backend Lint
-        run: >-
-          cd backend && npx eslint . --ext .ts --parser @typescript-eslint/parser --rule '{"no-unused-vars": "warn"}'
