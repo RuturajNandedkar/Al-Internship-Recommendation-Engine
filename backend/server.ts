@@ -11,6 +11,7 @@ dotenv.config();
 import connectDB from "./config/db";
 import errorHandler from "./middleware/errorHandler";
 import logger from "./utils/logger";
+import redis from "./config/redis";
 
 // Route imports
 import authRoutes from "./routes/authRoutes";
@@ -129,8 +130,10 @@ app.use("/api/resume", aiLimiter, resumeRoutes);
 
 app.get("/api/health", async (_req: Request, res: Response) => {
   let dbStatus = "disconnected";
+  let redisStatus = "disconnected";
   try {
     if (mongoose.connection.readyState === 1) dbStatus = "connected";
+    if ((redis as any).status === "ready") redisStatus = "connected";
   } catch { /* ignore */ }
 
   res.status(200).json({
@@ -140,6 +143,7 @@ app.get("/api/health", async (_req: Request, res: Response) => {
     environment: process.env.NODE_ENV || "development",
     uptime: Math.round(process.uptime()),
     database: dbStatus,
+    redis: redisStatus,
     memory: {
       rss: `${Math.round(process.memoryUsage().rss / 1024 / 1024)}MB`,
       heap: `${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`,

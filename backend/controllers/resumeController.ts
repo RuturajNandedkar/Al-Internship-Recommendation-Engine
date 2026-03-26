@@ -9,6 +9,8 @@ import RecommendationHistory from "../models/RecommendationHistory";
 import asyncHandler from "../middleware/asyncHandler";
 import AppError from "../utils/AppError";
 import logger from "../utils/logger";
+import { resumeQueue } from "../queues/resumeQueue";
+import { Job } from "bullmq";
 
 // Multer config — store in memory, accept PDF only, max 5MB
 const upload = multer({
@@ -60,62 +62,24 @@ export const uploadResume = asyncHandler(async (req: Request, res: Response) => 
     throw AppError.badRequest("Resume appears to be empty or too short. Please upload a text-based PDF.");
   }
 
-  // Extract profile from resume text
-  const extractedProfile = extractProfileFromResume(resumeText);
-
-  // Update user's profile in DB
-  if (req.user) {
-    await User.findByIdAndUpdate(req.user._id, {
-      resumeText: resumeText.substring(0, 10000), // store first 10k chars
-      resumeFileName: req.file.originalname,
-    });
-
-    if (req.user.profile) {
-      await Profile.findByIdAndUpdate(req.user.profile, {
-        skills: extractedProfile.skills,
-        interests: extractedProfile.interests,
-        preferred_domain: extractedProfile.preferred_domain,
-        experience_level: extractedProfile.experience_level,
-      });
-    }
-  }
-
-  // Generate recommendations from extracted profile
-  const recommendations = await getRecommendations({
-    skills: extractedProfile.skills,
-    interests: extractedProfile.interests,
-    preferred_domain: extractedProfile.preferred_domain,
-    experience_level: extractedProfile.experience_level,
+  // Enqueue parsing job
+  const job = await resumeQueue.add("parse-resume", {
+    userId: req.user?._id,
+    resumeText,
+    fileName: req.file.originalname,
+    type: "keyword", // standard extraction
   });
 
-  // Save to history if authenticated
-  if (req.user) {
-    await RecommendationHistory.create({
-      userId: req.user._id,
-      profileSnapshot: extractedProfile,
-      recommendations: recommendations.slice(0, 10).map((r: any) => ({
-        internshipId: r._id,
-        title: r.title,
-        company: r.company,
-        score: r.score,
-        reasoning: r.reasoning || "",
-      })),
-      source: "backend",
-    });
-  }
-
-  logger.info("Resume processed", {
+  logger.info("Resume enqueued for parsing", {
     user: req.user?._id,
-    filename: req.file.originalname,
-    skillsExtracted: extractedProfile.skills.length,
+    jobId: job.id,
   });
 
-  res.status(200).json({
+  res.status(202).json({
     success: true,
+    message: "Resume upload successful. Processing in background.",
     data: {
-      extractedProfile,
-      recommendations,
-      fileName: req.file.originalname,
+      jobId: job.id,
     },
   });
 });
@@ -169,64 +133,52 @@ async function parsePdfFromRequest(req: Request, res: Response) {
 export const analyzeAndRecommend = asyncHandler(async (req: Request, res: Response) => {
   const { resumeText, fileName } = await parsePdfFromRequest(req, res);
 
-  // AI-powered extraction + analysis
-  const { extractedProfile, analysis } = await getFullResumeAnalysis(resumeText);
-
-  // Persist resume text and update profile
-  if (req.user) {
-    await User.findByIdAndUpdate(req.user._id, {
-      resumeText: resumeText.substring(0, 10000),
-      resumeFileName: fileName,
-    });
-
-    if (req.user.profile) {
-      await Profile.findByIdAndUpdate(req.user.profile, {
-        skills: extractedProfile.skills,
-        interests: extractedProfile.interests,
-        preferred_domain: extractedProfile.preferred_domain,
-        experience_level: extractedProfile.experience_level,
-      });
-    }
-  }
-
-  // Generate internship recommendations from the extracted profile
-  const recommendations = await getRecommendations({
-    skills: extractedProfile.skills,
-    interests: extractedProfile.interests,
-    preferred_domain: extractedProfile.preferred_domain,
-    experience_level: extractedProfile.experience_level,
+  // Enqueue AI parsing job
+  const job = await resumeQueue.add("parse-resume-ai", {
+    userId: req.user?._id,
+    resumeText,
+    fileName,
+    type: "ai", // AI-powered extraction
   });
 
-  // Save to history
-  if (req.user) {
-    await RecommendationHistory.create({
-      userId: req.user._id,
-      profileSnapshot: extractedProfile,
-      recommendations: recommendations.slice(0, 10).map((r: any) => ({
-        internshipId: r._id,
-        title: r.title,
-        company: r.company,
-        score: r.score,
-        reasoning: r.reasoning || "",
-      })),
-      source: "ai-resume",
-    });
-  }
-
-  logger.info("Resume analyzed with AI", {
+  logger.info("Resume enqueued for AI analysis", {
     user: req.user?._id,
-    filename: fileName,
-    skillsExtracted: extractedProfile.skills.length,
-    resumeScore: (analysis as any)?.resume_score,
+    jobId: job.id,
   });
+
+  res.status(202).json({
+    success: true,
+    message: "AI Resume analysis started. Processing in background.",
+    data: {
+      jobId: job.id,
+    },
+  });
+});
+
+/**
+ * @desc    Get status of a resume parsing job
+ * @route   GET /api/resume/status/:jobId
+ * @access  Private
+ */
+export const getJobStatus = asyncHandler(async (req: Request, res: Response) => {
+  const { jobId } = req.params;
+  const job = await Job.fromId(resumeQueue, jobId as string);
+
+  if (!job) {
+    throw AppError.notFound("Job not found or has expired.");
+  }
+
+  const status = await job.getState();
+  const result = (job as any).returnvalue;
+  const progress = job.progress;
 
   res.status(200).json({
     success: true,
     data: {
-      extractedProfile,
-      analysis,
-      recommendations,
-      fileName,
+      id: job.id,
+      status,
+      progress,
+      result,
     },
   });
 });

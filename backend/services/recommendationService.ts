@@ -1,5 +1,7 @@
 import Internship, { IInternship } from "../models/Internship";
 import logger from "../utils/logger";
+import redis from "../config/redis";
+import crypto from "crypto";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AI-Based Internship Recommendation Engine  v2.0
@@ -362,6 +364,24 @@ async function getRecommendations(
     location = "",
   } = profile;
 
+  // 1. Generate cache key based on user profile
+  const profileHash = crypto
+    .createHash("md5")
+    .update(JSON.stringify({ skills, interests, preferred_domain, experience_level, location }))
+    .digest("hex");
+  const cacheKey = `recommendations:${profileHash}`;
+
+  // 2. Try to get from cache
+  try {
+    const cached = await redis.get(cacheKey);
+    if (cached) {
+      logger.info("Serving recommendations from cache", { profileHash });
+      return JSON.parse(cached);
+    }
+  } catch (err: any) {
+    logger.error("Redis cache get error", { error: err.message });
+  }
+
   const internships = await Internship.find({}).lean();
   const idf = buildIDF(internships);
 
@@ -437,12 +457,18 @@ async function getRecommendations(
     topDomains: [...new Set(results.map((r) => r.domain).filter(Boolean) as string[])],
     timestamp: new Date().toISOString(),
   };
-
   logger.info("Recommendations generated", {
     profile: { skills: skills.length, domain: preferred_domain, level: experience_level },
     results: results.length,
     avgScore: metadata.averageScore,
   });
+
+  // 3. Save to cache (30 minutes)
+  try {
+    await redis.set(cacheKey, JSON.stringify(results), "EX", 30 * 60);
+  } catch (err: any) {
+    logger.error("Redis cache set error", { error: err.message });
+  }
 
   return results;
 }
