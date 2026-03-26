@@ -1,0 +1,18 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Vercel Deployment
+        run: |
+          if [ -n "${{ secrets.VERCEL_DEPLOY_HOOK_URL }}" ]; then
+            curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK_URL }}"
+          else
+            echo "VERCEL_DEPLOY_HOOK_URL not set, skipping deployment hook."
+          fi

@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Install Frontend Dependencies
+      run: npm install
+
+    - name: Run Frontend Lint
+      run: npm run lint
+      continue-on-error: true
+
+    - name: Run Frontend Tests
+      run: npm test -- --passWithNoTests
+
+    - name: Build Frontend
+      run: npm run build
+
+    - name: Install Backend Dependencies
+      working-directory: ./backend
+      run: npm install
+
+    - name: Run Backend Lint
+      working-directory: ./backend
+      run: npm run lint
+      continue-on-error: true
+
+    - name: Run Backend Tests
+      working-directory: ./backend
+      run: npm test -- --passWithNoTests
