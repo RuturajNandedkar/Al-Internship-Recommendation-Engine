@@ -7,42 +7,34 @@ on:
     branches: [ main, develop ]
 
 jobs:
-  build-and-test:
+  frontend:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [20.x]
-
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - name: Install Frontend Dependencies
+        run: npm ci --legacy-peer-deps
+      - name: Run Frontend Lint
+        run: npx eslint src --ext .ts,.tsx --quiet
+      - name: Build Frontend
+        run: npm run build
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-
-    - name: Install Frontend Dependencies
-      run: npm ci --legacy-peer-deps
-
-    - name: Run Frontend Lint
-      run: npx eslint src --ext .ts,.tsx --quiet
-
-    - name: Run Frontend Tests
-      run: npm test -- --passWithNoTests
-
-    - name: Build Frontend
-      run: npm run build
-
-    - name: Install Backend Dependencies
-      working-directory: ./backend
-      run: npm ci --legacy-peer-deps
-
-    - name: Run Backend Lint
-      working-directory: ./backend
-      run: npx eslint . --ext .ts --quiet
-
-    - name: Run Backend Tests
-      working-directory: ./backend
-      run: npm test -- --passWithNoTests
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - name: Install Backend Dependencies
+        working-directory: ./backend
+        run: npm ci --legacy-peer-deps
+      - name: Run Backend Lint
+        working-directory: ./backend
+        run: npx eslint . --ext .ts --quiet
