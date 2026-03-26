@@ -10,120 +10,81 @@ interface RecommendationCardProps {
   t: TranslationContent;
 }
 
-type FeedbackState = "up" | "down" | null;
-
-/** POST thumbs feedback to the backend. Fire-and-forget. */
-async function postFeedback(id: string, helpful: boolean): Promise<void> {
-  try {
-    await fetch(`/api/recommendations/${id}/feedback`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ helpful }),
-    });
-  } catch (err) {
-    console.warn("[Feedback] Could not reach backend:", err);
-  }
-}
-
 export default function RecommendationCard({ internship, rank, t }: RecommendationCardProps) {
-  const [expanded, setExpanded] = useState(false);
-  const [feedback, setFeedback] = useState<FeedbackState>(null);
-  const [feedbackSent, setFeedbackSent] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
-  const handleFeedback = async (helpful: boolean) => {
-    if (feedbackSent) return;
-    const next: FeedbackState = helpful ? "up" : "down";
-    setFeedback(next);
-    setFeedbackSent(true);
-    await postFeedback(String(internship.id), helpful);
-  };
-
-  const rankStyles =
-    rank === 1
-      ? { background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: 'white', boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)' }
-      : rank === 2
-      ? { background: 'linear-gradient(135deg, #94a3b8, #64748b)', color: 'white', boxShadow: '0 4px 12px rgba(148, 163, 184, 0.3)' }
-      : rank === 3
-      ? { background: 'linear-gradient(135deg, #f97316, #ea580c)', color: 'white', boxShadow: '0 4px 12px rgba(249, 115, 22, 0.3)' }
-      : { background: '#eef2ff', color: '#4338ca', border: '1px solid #c7d2fe' };
+  // Helper to get initials or first letter
+  const getLogoLetter = (name: string) => name.charAt(0).toUpperCase();
 
   return (
-    <div className="rec-card bg-white rounded-3xl overflow-hidden animate-fadeIn">
-      {/* Top section with ring + info */}
-      <div className="p-6 sm:p-7">
-        <div className="flex items-start gap-5">
-          {/* Match Ring */}
-          <div className="flex-shrink-0 hidden sm:block">
-            <MatchPercentageRing score={internship.score} size={84} strokeWidth={5} />
-          </div>
+    <div className="reveal group relative bg-[#12121c] border border-white/5 rounded-[16px] p-7 transition-all duration-300 hover:-translate-y-1 hover:border-white/10 hover:shadow-[0_20px_60px_rgba(0,0,0,0.4)] overflow-hidden">
+      {/* Top Gradient Border (Animated on Hover) */}
+      <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-accent to-[#38bdf8] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-          {/* Info */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <span
-                className="text-xs font-bold px-3.5 py-1.5 rounded-xl"
-                style={rankStyles}
-              >
-                #{rank}
-              </span>
-              <h3 className="text-base sm:text-lg font-extrabold text-gray-900 leading-snug tracking-tight">
-                {internship.title}
-              </h3>
-            </div>
-            <p className="text-sm text-gray-500 mt-1.5 flex items-center gap-2">
-              <span className="text-base">{internship.icon}</span>
-              <span className="font-semibold">{internship.company}</span>
+      {/* Card Header */}
+      <div className="flex justify-between items-start mb-6">
+        <div className="flex gap-4 items-center">
+          {/* Company Logo Placeholder */}
+          <div className="w-[48px] h-[48px] rounded-[12px] bg-surface2 flex items-center justify-center border border-white/5 font-display font-bold text-lg text-accent">
+            {getLogoLetter(internship.company)}
+          </div>
+          <div>
+            <h3 className="font-display font-bold text-[17px] text-white leading-none tracking-tight">
+              {internship.title}
+            </h3>
+            <p className="text-[13px] text-[#9898b0] mt-1.5 flex items-center gap-2">
+              <span>{internship.company}</span>
+              <span className="w-1 h-1 rounded-full bg-white/10" />
+              <span>{internship.location}</span>
             </p>
-
-            {/* Quick info tags */}
-            <div className="flex flex-wrap gap-2 mt-3.5">
-              {[
-                { icon: "📍", text: internship.location },
-                { icon: "⏱", text: internship.duration },
-                { icon: "💰", text: internship.stipend },
-              ].map((tag) => (
-                <span key={tag.icon} className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-xl font-medium text-gray-600" style={{ background: 'rgba(241, 245, 249, 0.8)', border: '1px solid rgba(226, 232, 240, 0.6)' }}>
-                  {tag.icon} {tag.text}
-                </span>
-              ))}
-              <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-xl font-medium" style={{ background: 'rgba(238, 242, 255, 0.8)', color: '#4338ca', border: '1px solid rgba(199, 210, 254, 0.6)' }}>
-                🏢 {internship.mode}
-              </span>
-            </div>
-          </div>
-
-          {/* Mobile match score */}
-          <div className="sm:hidden flex-shrink-0">
-            <MatchPercentageRing score={internship.score} size={68} strokeWidth={4} />
           </div>
         </div>
 
-        {/* Required skills preview */}
-        {internship.skills && internship.skills.length > 0 && (
-          <div className="mt-5 pt-5 border-t border-gray-100/80">
-            <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest mb-2.5">Required Skills</p>
-            <div className="flex flex-wrap gap-2">
-              {internship.skills.slice(0, 5).map((skill) => (
-                <span
-                  key={skill}
-                  className="text-[11px] px-3 py-1.5 rounded-lg font-semibold"
-                  style={{ background: 'linear-gradient(135deg, #eef2ff, #ede9fe)', color: '#4338ca', border: '1px solid #c7d2fe' }}
-                >
-                  {skill}
-                </span>
-              ))}
-              {internship.skills.length > 5 && (
-                <span className="text-[11px] px-3 py-1.5 rounded-lg font-medium" style={{ background: '#f1f5f9', color: '#94a3b8' }}>
-                  +{internship.skills.length - 5} more
-                </span>
-              )}
-            </div>
-          </div>
-        )}
+        {/* Score Ring (Top Right) */}
+        <div className="flex-shrink-0">
+          <MatchPercentageRing score={internship.score} />
+        </div>
       </div>
 
-      {/* AI Explanation section */}
-      <div className="px-6 sm:px-7">
+      {/* Meta Pills */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        {[
+          { icon: "📍", text: internship.location },
+          { icon: "💰", text: internship.stipend },
+          { icon: "⏱", text: internship.duration },
+        ].map((tag, i) => (
+          <span 
+            key={i} 
+            className="px-3 py-1.5 rounded-full bg-surface2 text-[11px] font-medium text-white/60 border border-white/5"
+          >
+            {tag.text}
+          </span>
+        ))}
+      </div>
+
+      {/* Skills Section */}
+      <div className="mb-6">
+        <div className="flex flex-wrap gap-2">
+          {internship.skills?.map((skill, i) => {
+            const isMatched = i < 3; // Placeholder logic for matched skills
+            return (
+              <span 
+                key={skill}
+                className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-colors
+                  ${isMatched 
+                    ? "bg-accent/10 text-accent2 border border-accent/20" 
+                    : "bg-white/[0.03] text-white/30 border border-white/5"}
+                `}
+              >
+                {skill}
+              </span>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* AI Insight Box */}
+      <div className="mb-8">
         <AIExplanation
           reasoning={internship.reasoning}
           breakdown={internship.breakdown}
@@ -131,96 +92,38 @@ export default function RecommendationCard({ internship, rank, t }: Recommendati
         />
       </div>
 
-      {/* Expandable details */}
-      <div className="px-6 sm:px-7 py-5">
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="text-primary-600 text-sm font-bold hover:text-primary-700 flex items-center gap-2 transition-all duration-300 w-full justify-center py-2.5 rounded-2xl hover:bg-primary-50/60 border border-transparent hover:border-primary-100"
+      {/* Action Buttons Row */}
+      <div className="flex items-center gap-3">
+        <button 
+          className="flex-[2] py-3 rounded-[8px] bg-accent text-white font-body font-medium text-[14px] hover:bg-accent/90 transition-all shadow-lg shadow-accent/20"
+          onClick={() => window.open('#', '_blank')}
         >
-          <svg
-            className={`w-4 h-4 transition-transform duration-300 ${expanded ? "rotate-180" : ""}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-          {expanded ? "Hide Details" : t.viewDetails}
+          Apply Now
         </button>
-
-        {expanded && (
-          <div className="mt-4 space-y-4 animate-fadeIn pb-2">
-            <p className="text-sm text-gray-600 leading-relaxed">{internship.description}</p>
-
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="p-3 rounded-xl" style={{ background: 'rgba(241, 245, 249, 0.6)', border: '1px solid rgba(226, 232, 240, 0.5)' }}>
-                <span className="text-gray-400 block text-[10px] uppercase tracking-widest font-bold">{t.sector}</span>
-                <span className="font-semibold text-gray-700 mt-1 block">{internship.sector}</span>
-              </div>
-              <div className="p-3 rounded-xl" style={{ background: 'rgba(241, 245, 249, 0.6)', border: '1px solid rgba(226, 232, 240, 0.5)' }}>
-                <span className="text-gray-400 block text-[10px] uppercase tracking-widest font-bold">{t.company}</span>
-                <span className="font-semibold text-gray-700 mt-1 block">{internship.company}</span>
-              </div>
-            </div>
-
-            {/* All required skills */}
-            {internship.skills && internship.skills.length > 5 && (
-              <div>
-                <p className="text-xs font-bold text-gray-500 mb-2">All Required Skills</p>
-                <div className="flex flex-wrap gap-2">
-                  {internship.skills.map((skill) => (
-                    <span
-                      key={skill}
-                      className="text-[11px] px-2.5 py-1 rounded-lg font-medium"
-                      style={{ background: '#eef2ff', color: '#4338ca', border: '1px solid #c7d2fe' }}
-                    >
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
+        <button 
+          className={`flex-1 py-3 rounded-[8px] border font-body font-medium text-[14px] transition-all relative overflow-hidden
+            ${isSaved ? "bg-accent/10 border-accent/30 text-accent font-bold btn-save-animate" : "border-white/10 text-[#9898b0] hover:bg-white/5"}
+          `}
+          onClick={() => setIsSaved(!isSaved)}
+        >
+          <div className="flex items-center justify-center gap-2">
+            <svg 
+              className={`w-4 h-4 transition-colors ${isSaved ? "fill-accent text-accent" : "text-[#9898b0]"}`} 
+              fill={isSaved ? "currentColor" : "none"} 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+            </svg>
+            <span>{isSaved ? t.viewDetails : t.back.split(' ')[1]}</span>
           </div>
-        )}
-      </div>
-
-      {/* ── Thumbs Feedback Bar ── */}
-      <div
-        className="px-6 sm:px-7 py-4 border-t border-gray-100/80 flex items-center justify-between"
-        style={{ background: 'rgba(248, 250, 252, 0.6)' }}
-      >
-        <span className="text-xs text-gray-400 font-semibold">
-          {feedbackSent ? "Thanks for your feedback!" : "Was this helpful?"}
-        </span>
-
-        <div className="flex items-center gap-2">
-          <button
-            id={`feedback-up-${internship.id}`}
-            onClick={() => handleFeedback(true)}
-            disabled={feedbackSent}
-            title="Helpful"
-            className={`w-9 h-9 rounded-xl flex items-center justify-center text-base transition-all duration-200 font-medium
-              ${feedback === "up"
-                ? "bg-emerald-100 text-emerald-600 scale-110 shadow-sm"
-                : "bg-gray-100 text-gray-400 hover:bg-emerald-50 hover:text-emerald-500 hover:scale-105"}
-              ${feedbackSent ? "cursor-default opacity-70" : "cursor-pointer"}`}
-          >
-            👍
-          </button>
-          <button
-            id={`feedback-down-${internship.id}`}
-            onClick={() => handleFeedback(false)}
-            disabled={feedbackSent}
-            title="Not helpful"
-            className={`w-9 h-9 rounded-xl flex items-center justify-center text-base transition-all duration-200 font-medium
-              ${feedback === "down"
-                ? "bg-red-100 text-red-500 scale-110 shadow-sm"
-                : "bg-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-400 hover:scale-105"}
-              ${feedbackSent ? "cursor-default opacity-70" : "cursor-pointer"}`}
-          >
-            👎
-          </button>
-        </div>
+        </button>
+        <button 
+          className="flex-1 py-3 rounded-[8px] border border-white/10 text-[#9898b0] font-body font-medium text-[14px] hover:bg-white/5 transition-all"
+          onClick={() => console.log('Gap Analysis')}
+        >
+          Analysis
+        </button>
       </div>
     </div>
   );

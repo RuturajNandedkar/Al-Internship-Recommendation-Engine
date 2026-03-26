@@ -10,53 +10,45 @@ export default function StepIndicator({ currentStep, totalSteps, t }: StepIndica
   const steps = [t.step1, t.step2, t.step3];
 
   return (
-    <div className="flex items-center justify-center gap-3 mb-10">
+    <div className="flex items-center justify-between max-w-md mx-auto mb-12 relative">
+      {/* Connecting Lines Container (Behind) */}
+      <div className="absolute top-5 left-0 w-full h-px bg-white/5 -z-10" />
+      
       {steps.map((label, idx) => {
         const stepNum = idx + 1;
         const isActive = stepNum === currentStep;
         const isCompleted = stepNum < currentStep;
 
         return (
-          <div key={idx} className="flex items-center gap-3">
-            <div className="flex flex-col items-center">
-              <div
-                className={`w-11 h-11 rounded-2xl flex items-center justify-center text-sm font-bold transition-all duration-500 ${
-                  isCompleted
-                    ? "text-white shadow-lg"
-                    : isActive
-                    ? "text-white ring-4 ring-primary-100 shadow-lg"
-                    : "bg-gray-100 text-gray-400 border-2 border-gray-200"
-                }`}
-                style={
-                  isCompleted
-                    ? { background: 'linear-gradient(135deg, #22c55e, #16a34a)', boxShadow: '0 4px 15px rgba(34, 197, 94, 0.3)' }
-                    : isActive
-                    ? { background: 'linear-gradient(135deg, #6366f1, #7c3aed)', boxShadow: '0 4px 15px rgba(99, 102, 241, 0.3)' }
-                    : {}
+          <div key={idx} className="flex flex-col items-center relative gap-3">
+            {/* Step Circle */}
+            <div
+              className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-mono transition-all duration-500 border
+                ${isCompleted 
+                  ? "bg-green border-green text-white shadow-[0_0_20px_rgba(16,185,129,0.3)]" 
+                  : isActive 
+                  ? "bg-accent border-accent text-white shadow-[0_0_20px_rgba(108,99,255,0.4)]" 
+                  : "bg-surface2 border-white/10 text-white/20"
                 }
-              >
-                {isCompleted ? (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                  </svg>
-                ) : stepNum}
-              </div>
-              <span
-                className={`text-xs mt-2 hidden sm:block font-semibold transition-colors duration-300 ${
-                  isActive ? "text-primary-700" : isCompleted ? "text-emerald-600" : "text-gray-400"
-                }`}
-              >
-                {label}
-              </span>
+              `}
+            >
+              {isCompleted ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              ) : (
+                <span className="font-bold">{stepNum}</span>
+              )}
             </div>
-            {idx < steps.length - 1 && (
-              <div
-                className={`w-10 sm:w-24 h-0.5 rounded-full transition-all duration-700 -mt-5 sm:-mt-6 ${
-                  isCompleted ? "" : "bg-gray-200"
-                }`}
-                style={isCompleted ? { background: 'linear-gradient(90deg, #22c55e, #16a34a)' } : {}}
-              />
-            )}
+
+            {/* Label */}
+            <span
+              className={`text-[10px] font-mono font-bold uppercase tracking-widest transition-colors duration-300 whitespace-nowrap
+                ${isActive ? "text-accent" : isCompleted ? "text-green" : "text-white/20"}
+              `}
+            >
+              {label}
+            </span>
           </div>
         );
       })}

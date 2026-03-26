@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext.tsx";
 import { TranslationContent } from "../data/translations.ts";
 
 interface Language {
@@ -20,73 +22,189 @@ interface HeaderProps {
 }
 
 export default function Header({ t, currentLang, onLangChange }: HeaderProps) {
+  const { isAuthenticated, user, logout } = useAuth();
   const [langOpen, setLangOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  const navLinks = [
+    { name: "Find Internships", path: "/" },
+    { name: "Skill Gap", path: "/skill-gap" },
+    { name: "Dashboard", path: "/dashboard", protected: true },
+  ];
 
   return (
-    <header className="header-gradient text-white shadow-xl relative z-10">
-      {/* Subtle top accent line */}
-      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+    <>
+      <header 
+        className={`fixed top-0 left-0 w-full z-[100] transition-all duration-300 animate-header-entrance
+          ${scrolled ? "py-3 bg-[#0a0a0f]/80 backdrop-blur-[20px] border-b border-white/10 shadow-lg" : "py-5 bg-[#0a0a0f]/40 backdrop-blur-[10px] border-b border-white/5"}
+        `}
+      >
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+          {/* Logo Section */}
+          <Link to="/" className="flex items-center gap-2 group">
+            <div className="relative">
+              <span className="text-2xl font-black font-display tracking-tighter text-white">
+                Intern<span className="text-accent">AI</span>
+              </span>
+              <div className="absolute -top-1 -right-3 w-2 h-2 rounded-full bg-accent animate-pulse-glow" />
+            </div>
+          </Link>
 
-      <div className="max-w-5xl mx-auto px-5 py-5 flex items-center justify-between relative z-10">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-xl font-bold backdrop-blur-md border border-white/15 shadow-lg shadow-black/10 transition-transform duration-300 hover:scale-105 hover:bg-white/15">
-            🎯
-          </div>
-          <div>
-            <h1 className="text-lg sm:text-xl font-extrabold leading-tight tracking-tight">{t.appTitle}</h1>
-            <p className="text-xs sm:text-sm text-indigo-200/70 font-light tracking-wide">{t.appSubtitle}</p>
-          </div>
-        </div>
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-8">
+            {navLinks.map((link) => (
+              (!link.protected || isAuthenticated) && (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={`text-[14px] font-body font-medium transition-all duration-300 hover:text-white
+                    ${location.pathname === link.path ? "text-white" : "text-[#9898b0]"}
+                  `}
+                >
+                  {link.name}
+                </Link>
+              )
+            ))}
+          </nav>
 
-        {/* Language selector */}
-        <div className="relative">
-          <button
-            onClick={() => setLangOpen(!langOpen)}
-            className="flex items-center gap-2.5 bg-white/8 hover:bg-white/15 px-4 py-2.5 rounded-2xl text-sm transition-all duration-300 backdrop-blur-md border border-white/10 hover:border-white/20 hover:shadow-lg hover:shadow-black/5"
-            aria-label={t.languageLabel}
-          >
-            <span className="text-base">{languages.find((l) => l.code === currentLang)?.flag}</span>
-            <span className="hidden sm:inline font-medium text-white/90">
-              {languages.find((l) => l.code === currentLang)?.label}
-            </span>
-            <svg className={`w-4 h-4 text-white/60 transition-transform duration-300 ${langOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-          {langOpen && (
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => setLangOpen(false)} />
-              <div className="absolute right-0 mt-3 rounded-2xl shadow-premium-lg overflow-hidden z-50 min-w-[180px] animate-scaleIn border border-gray-100/50" style={{ background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(20px)' }}>
-                {languages.map((lang) => (
-                  <button
-                    key={lang.code}
-                    onClick={() => {
-                      onLangChange(lang.code);
-                      setLangOpen(false);
-                    }}
-                    className={`w-full text-left px-4 py-3.5 text-sm flex items-center gap-3 transition-all duration-200 ${
-                      currentLang === lang.code
-                        ? "bg-primary-50 font-semibold text-primary-700"
-                        : "text-gray-700 hover:bg-primary-50/60"
-                    }`}
-                  >
-                    <span className="text-lg">{lang.flag}</span>
-                    <span>{lang.label}</span>
-                    {currentLang === lang.code && (
-                      <svg className="w-4 h-4 ml-auto text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                      </svg>
-                    )}
-                  </button>
-                ))}
+          {/* Actions Section */}
+          <div className="hidden md:flex items-center gap-5">
+            {/* Language Selection */}
+            <div className="relative">
+              <button
+                onClick={() => setLangOpen(!langOpen)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 hover:border-white/20 transition-all text-[13px] font-medium text-[#9898b0] hover:text-[#e8e8f0]"
+              >
+                <span>{languages.find(l => l.code === currentLang)?.flag}</span>
+                <span className="uppercase">{currentLang}</span>
+              </button>
+              
+              {langOpen && (
+                <div className="absolute right-0 mt-3 p-2 rounded-2xl bg-[#12121c] border border-white/10 shadow-2xl min-w-[140px] animate-scaleIn">
+                  {languages.map(lang => (
+                    <button
+                      key={lang.code}
+                      onClick={() => { onLangChange(lang.code); setLangOpen(false); }}
+                      className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-all
+                        ${currentLang === lang.code ? "bg-accent/10 text-accent font-bold" : "text-white/60 hover:bg-white/5 hover:text-white"}
+                      `}
+                    >
+                      {lang.flag} {lang.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Auth Buttons */}
+            <div className="h-4 w-px bg-white/10" />
+            
+            {isAuthenticated ? (
+              <div className="flex items-center gap-4">
+                <span className="text-sm font-medium text-white/40">Hi, {user?.name?.split(' ')[0]}</span>
+                <button 
+                  onClick={logout}
+                  className="text-sm font-bold text-coral/80 hover:text-coral transition-colors"
+                >
+                  Logout
+                </button>
               </div>
-            </>
-          )}
-        </div>
-      </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <Link 
+                  to="/login"
+                  className="px-5 py-2 text-sm font-bold text-white/70 hover:text-white rounded-xl border border-white/10 hover:bg-white/5 transition-all"
+                >
+                  Login
+                </Link>
+                <Link 
+                  to="/signup"
+                  className="px-5 py-2 text-sm font-bold text-white bg-accent rounded-xl hover:-translate-y-[1px] transition-all hover:shadow-[0_0_20px_rgba(108,99,255,0.4)]"
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
+          </div>
 
-      {/* Bottom edge gradient */}
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-    </header>
+          {/* Mobile Menu Toggle */}
+          <button 
+            className="md:hidden text-white p-1"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? (
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            ) : (
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" /></svg>
+            )}
+          </button>
+        </div>
+
+        {/* Mobile menu drawer */}
+        <div 
+          className={`fixed inset-0 z-[110] md:hidden transition-all duration-500 overflow-hidden ${mobileMenuOpen ? "pointer-events-auto" : "pointer-events-none"}`}
+        >
+          {/* Backdrop */}
+          <div 
+            className={`absolute inset-0 bg-[#0a0a0f]/60 backdrop-blur-sm transition-opacity duration-500 ${mobileMenuOpen ? "opacity-100" : "opacity-0"}`}
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          
+          {/* Drawer */}
+          <div 
+            className={`absolute top-0 right-0 w-[280px] h-full bg-[#12121c] border-l border-white/5 shadow-2xl transition-transform duration-500 ease-out ${mobileMenuOpen ? "translate-x-0" : "translate-x-full"}`}
+          >
+            <div className="p-8 h-full flex flex-col">
+              <div className="flex items-center justify-between mb-12">
+                <span className="text-xl font-bold font-display text-white">Menu</span>
+                <button onClick={() => setMobileMenuOpen(false)} className="text-white/40 hover:text-white p-2">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+
+              <nav className="space-y-6 mb-12">
+                {navLinks.map(link => (
+                  (!link.protected || isAuthenticated) && (
+                    <Link 
+                      key={link.path} 
+                      to={link.path} 
+                      className={`block text-lg font-bold transition-colors ${location.pathname === link.path ? "text-accent" : "text-white/60 hover:text-white"}`}
+                    >
+                      {link.name}
+                    </Link>
+                  )
+                ))}
+              </nav>
+
+              <div className="mt-auto space-y-4">
+                {isAuthenticated ? (
+                  <button onClick={logout} className="w-full py-3 rounded-2xl bg-coral/10 text-coral font-bold uppercase tracking-widest text-xs">Logout</button>
+                ) : (
+                  <>
+                    <Link to="/login" className="block w-full py-3 rounded-2xl bg-white/5 text-center font-bold text-white hover:bg-white/10 transition-colors">Login</Link>
+                    <Link to="/signup" className="block w-full py-3 rounded-2xl bg-accent text-center font-bold text-white shadow-lg shadow-accent/20">Sign Up</Link>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+      {/* Spacer to prevent content from jumping under fixed header */}
+      <div className="h-20" />
+    </>
   );
 }

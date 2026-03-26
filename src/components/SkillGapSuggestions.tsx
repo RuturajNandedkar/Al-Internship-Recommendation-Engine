@@ -55,22 +55,22 @@ export default function SkillGapSuggestions({ results, userSkills }: SkillGapSug
   const coveragePercent = totalRequired > 0 ? Math.round((matchedSkills.length / totalRequired) * 100) : 0;
 
   return (
-    <div className="card-premium overflow-hidden animate-fadeIn">
+    <div className="card-premium overflow-hidden animate-fadeIn bg-surface/30 border border-white/5">
       {/* Header */}
-      <div className="px-7 py-6" style={{ background: 'linear-gradient(135deg, #f59e0b, #ea580c, #f59e0b)', backgroundSize: '200% 200%' }}>
+      <div className="px-7 py-6" style={{ background: 'linear-gradient(135deg, var(--surface2), var(--ink))' }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="rounded-2xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', width: '52px', height: '52px' }}>
+            <div className="rounded-2xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', width: '52px', height: '52px' }}>
               <span className="text-2xl">📊</span>
             </div>
             <div>
-              <h3 className="text-white font-extrabold text-xl tracking-tight">Skill Gap Analysis</h3>
-              <p className="text-amber-100/80 text-xs font-semibold">Based on your recommended internships</p>
+              <h3 className="text-white font-extrabold text-xl tracking-tight font-display">Skill Gap Analysis</h3>
+              <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest">Based on your recommendations</p>
             </div>
           </div>
           <div className="text-right">
-            <div className="text-3xl font-extrabold text-white">{coveragePercent}%</div>
-            <div className="text-[10px] text-amber-100/80 uppercase tracking-widest font-bold">Coverage</div>
+            <div className="text-3xl font-extrabold text-white font-display">{coveragePercent}%</div>
+            <div className="text-[10px] text-white/20 uppercase tracking-widest font-bold">Coverage</div>
           </div>
         </div>
       </div>
@@ -78,16 +78,16 @@ export default function SkillGapSuggestions({ results, userSkills }: SkillGapSug
       <div className="p-7 space-y-7">
         {/* Coverage bar */}
         <div>
-          <div className="flex justify-between text-xs mb-2">
-            <span className="text-gray-500 font-medium">Skill Coverage</span>
-            <span className="font-bold text-gray-700">
+          <div className="flex justify-between text-[10px] uppercase tracking-widest mb-2">
+            <span className="text-white/20 font-bold">Skill Coverage</span>
+            <span className="font-bold text-white/40">
               {matchedSkills.length} of {totalRequired} skills matched
             </span>
           </div>
-          <div className="w-full rounded-full h-3.5 overflow-hidden" style={{ background: 'rgba(241, 245, 249, 0.8)' }}>
+          <div className="w-full rounded-full h-3.5 overflow-hidden bg-white/5 border border-white/5">
             <div
-              className="h-3.5 rounded-full transition-all duration-1000 ease-out"
-              style={{ width: `${coveragePercent}%`, background: 'linear-gradient(90deg, #f59e0b, #ea580c)' }}
+              className="h-3.5 rounded-full transition-all duration-1000 ease-out shadow-lg shadow-gold/20"
+              style={{ width: `${coveragePercent}%`, background: 'var(--gold)' }}
             />
           </div>
         </div>
@@ -95,19 +95,19 @@ export default function SkillGapSuggestions({ results, userSkills }: SkillGapSug
         {/* Your strengths */}
         {matchedSkills.length > 0 && (
           <div>
-            <h4 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-              <span className="w-6 h-6 rounded-lg flex items-center justify-center text-xs" style={{ background: 'linear-gradient(135deg, #dcfce7, #bbf7d0)' }}>✅</span>
+            <h4 className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-4 flex items-center gap-2 font-display">
+              <span className="w-6 h-6 rounded-lg flex items-center justify-center text-xs" style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>✅</span>
               Your Strengths
             </h4>
             <div className="flex flex-wrap gap-2.5">
               {matchedSkills.map((skill) => (
                 <span
                   key={skill.name}
-                  className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-xl font-semibold"
-                  style={{ background: 'linear-gradient(135deg, #dcfce7, #bbf7d0)', color: '#15803d', border: '1px solid #86efac' }}
+                  className="inline-flex items-center gap-1.5 text-[10px] px-3.5 py-1.5 rounded-xl font-bold uppercase tracking-wider"
+                  style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--green)', border: '1px solid rgba(16, 185, 129, 0.2)' }}
                 >
                   {skill.name}
-                  <span className="text-[10px] opacity-70">
+                  <span className="opacity-40">
                     · {skill.count} {skill.count === 1 ? "match" : "matches"}
                   </span>
                 </span>
@@ -119,8 +119,8 @@ export default function SkillGapSuggestions({ results, userSkills }: SkillGapSug
         {/* Skill gaps */}
         {gapSkills.length > 0 && (
           <div>
-            <h4 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-              <span className="w-6 h-6 rounded-lg flex items-center justify-center text-xs" style={{ background: 'linear-gradient(135deg, #fef2f2, #fecaca)' }}>🎯</span>
+            <h4 className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-4 flex items-center gap-2 font-display">
+              <span className="w-6 h-6 rounded-lg flex items-center justify-center text-xs" style={{ background: 'rgba(244, 63, 94, 0.1)', border: '1px solid rgba(244, 63, 94, 0.2)' }}>🎯</span>
               Skills to Develop
             </h4>
             <div className="space-y-2.5">
@@ -129,24 +129,23 @@ export default function SkillGapSuggestions({ results, userSkills }: SkillGapSug
                   skill.count >= 3 ? "High" : skill.count >= 2 ? "Medium" : "Low";
                 const priorityStyle =
                   skill.count >= 3
-                    ? { background: 'linear-gradient(135deg, #fef2f2, #fecaca)', color: '#dc2626', border: '1px solid #fca5a5' }
+                    ? { background: 'rgba(244, 63, 94, 0.1)', color: 'var(--coral)', border: '1px solid rgba(244, 63, 94, 0.2)' }
                     : skill.count >= 2
-                    ? { background: 'linear-gradient(135deg, #fef9c3, #fde68a)', color: '#a16207', border: '1px solid #fcd34d' }
-                    : { background: 'rgba(241, 245, 249, 0.8)', color: '#64748b', border: '1px solid #e2e8f0' };
+                    ? { background: 'rgba(245, 158, 11, 0.1)', color: 'var(--gold)', border: '1px solid rgba(245, 158, 11, 0.2)' }
+                    : { background: 'rgba(255, 255, 255, 0.05)', color: 'white/40', border: '1px solid rgba(255, 255, 255, 0.1)' };
 
                 return (
                   <div
                     key={skill.name}
-                    className="flex items-center justify-between py-3 px-4 rounded-xl transition-all duration-200 hover:shadow-sm"
-                    style={{ background: 'rgba(248, 250, 252, 0.6)', border: '1px solid rgba(226, 232, 240, 0.5)' }}
+                    className="flex items-center justify-between py-4 px-5 rounded-2xl transition-all duration-300 hover:shadow-lg border border-white/5 bg-white/5"
                   >
                     <div className="flex items-center gap-2.5">
-                      <span className="text-sm font-bold text-gray-800">{skill.name}</span>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-lg" style={priorityStyle}>
+                      <span className="text-sm font-bold text-white font-display">{skill.name}</span>
+                      <span className="text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wider" style={priorityStyle}>
                         {priority} Priority
                       </span>
                     </div>
-                    <span className="text-[11px] text-gray-400 font-medium">
+                    <span className="text-[10px] text-white/30 font-bold uppercase tracking-widest">
                       Needed in {skill.count} {skill.count === 1 ? "internship" : "internships"}
                     </span>
                   </div>
@@ -157,10 +156,10 @@ export default function SkillGapSuggestions({ results, userSkills }: SkillGapSug
         )}
 
         {gapSkills.length === 0 && matchedSkills.length > 0 && (
-          <div className="text-center py-5 rounded-2xl" style={{ background: 'linear-gradient(135deg, #dcfce7, #bbf7d0)', border: '1px solid #86efac' }}>
+          <div className="text-center py-7 rounded-2xl border border-green/20 bg-green/10">
             <span className="text-3xl">🎉</span>
-            <p className="text-sm font-bold text-green-700 mt-2">
-              Great job! Your skills cover all recommended internship requirements.
+            <p className="text-sm font-bold text-green mt-3 font-display uppercase tracking-widest">
+              Success! Your skills cover all requirements.
             </p>
           </div>
         )}

@@ -38,22 +38,23 @@ export default class ErrorBoundary extends Component<Props, State> {
           <div
             className="w-24 h-24 rounded-3xl flex items-center justify-center mb-6 shadow-md"
             style={{
-              background: "linear-gradient(135deg, #fee2e2, #fecaca)",
+              background: "rgba(244, 63, 94, 0.1)",
+              border: "1px solid rgba(244, 63, 94, 0.2)",
             }}
           >
             <span className="text-5xl">🚨</span>
           </div>
 
-          <h2 className="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">
+          <h2 className="text-2xl font-extrabold text-white mb-2 tracking-tight font-display">
             Something went wrong
           </h2>
-          <p className="text-gray-500 text-sm mb-8 max-w-sm text-center leading-relaxed">
+          <p className="text-white/40 text-sm mb-8 max-w-sm text-center leading-relaxed font-medium">
             An unexpected error occurred while loading your recommendations.
             Please try again — your form data won't be lost.
           </p>
 
           {this.state.errorMessage && (
-            <p className="text-xs text-gray-400 font-mono mb-6 px-4 py-2 rounded-xl bg-gray-50 border border-gray-200 max-w-xs text-center break-all">
+            <p className="text-xs text-white/30 font-mono mb-6 px-4 py-2 rounded-xl bg-white/5 border border-white/10 max-w-xs text-center break-all">
               {this.state.errorMessage}
             </p>
           )}

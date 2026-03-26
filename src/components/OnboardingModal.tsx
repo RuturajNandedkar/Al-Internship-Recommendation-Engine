@@ -55,20 +55,20 @@ export default function OnboardingModal() {
     /* Backdrop */
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(15, 23, 42, 0.55)", backdropFilter: "blur(6px)" }}
+      style={{ background: "rgba(10, 10, 15, 0.8)", backdropFilter: "blur(12px)" }}
       role="dialog"
       aria-modal="true"
       aria-label="Welcome to the AI Internship Engine"
     >
       {/* Card */}
       <div
-        className="relative w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-slideUp"
-        style={{ background: "linear-gradient(160deg, #ffffff, #f8faff)" }}
+        className="relative w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-slideUp border border-white/10"
+        style={{ background: "var(--surface)" }}
       >
         {/* Skip */}
         <button
           onClick={handleFinish}
-          className="absolute top-4 right-5 text-xs text-gray-400 hover:text-gray-600 font-semibold transition-colors"
+          className="absolute top-4 right-5 text-[10px] text-white/20 hover:text-white/40 font-bold uppercase tracking-widest transition-colors"
         >
           Skip
         </button>
@@ -77,15 +77,15 @@ export default function OnboardingModal() {
         <div className="px-8 pt-12 pb-8 text-center">
           <div
             className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-md"
-            style={{ background: "linear-gradient(135deg, #eef2ff, #ede9fe)" }}
+            style={{ background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)" }}
           >
             <span className="text-4xl">{current.emoji}</span>
           </div>
 
-          <h2 className="text-xl font-extrabold text-gray-900 mb-3 tracking-tight">
+          <h2 className="text-xl font-extrabold text-white mb-3 tracking-tight font-display">
             {current.title}
           </h2>
-          <p className="text-sm text-gray-500 leading-relaxed max-w-xs mx-auto">
+          <p className="text-sm text-white/40 leading-relaxed max-w-xs mx-auto font-medium">
             {current.body}
           </p>
         </div>
@@ -102,8 +102,8 @@ export default function OnboardingModal() {
                 height: "8px",
                 background:
                   i === slide
-                    ? "linear-gradient(135deg, #6366f1, #8b5cf6)"
-                    : "#e2e8f0",
+                    ? "var(--accent)"
+                    : "rgba(255, 255, 255, 0.1)",
               }}
               aria-label={`Go to slide ${i + 1}`}
             />
@@ -115,7 +115,7 @@ export default function OnboardingModal() {
           <button
             onClick={() => setSlide((s) => s - 1)}
             disabled={isFirst}
-            className="px-5 py-2.5 rounded-xl text-sm font-semibold text-gray-500 transition-all duration-200 hover:bg-gray-100 disabled:opacity-0 disabled:pointer-events-none"
+            className="px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest text-white/20 transition-all duration-200 hover:bg-white/5 disabled:opacity-0 disabled:pointer-events-none"
           >
             ← Back
           </button>
@@ -123,14 +123,14 @@ export default function OnboardingModal() {
           {isLast ? (
             <button
               onClick={handleFinish}
-              className="btn-primary flex-1 py-3 rounded-2xl text-sm font-bold"
+              className="btn-primary flex-1 py-3 rounded-2xl text-sm font-bold shadow-lg shadow-accent/20"
             >
               Get Started 🚀
             </button>
           ) : (
             <button
               onClick={() => setSlide((s) => s + 1)}
-              className="btn-primary flex-1 py-3 rounded-2xl text-sm font-bold"
+              className="btn-primary flex-1 py-3 rounded-2xl text-sm font-bold shadow-lg shadow-accent/20"
             >
               Next →
             </button>

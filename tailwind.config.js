@@ -7,9 +7,21 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        display: ['Syne', 'sans-serif'],
+        body: ['DM Sans', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
+        sans: ['DM Sans', 'Inter', 'system-ui', 'sans-serif'],
       },
       colors: {
+        ink: '#0a0a0f',
+        surface: '#12121c',
+        surface2: '#1a1a28',
+        accent: '#6c63ff',
+        accent2: '#a78bfa',
+        accent3: '#38bdf8',
+        gold: '#f59e0b',
+        green: '#10b981',
+        coral: '#f43f5e',
         primary: {
           50: '#eef2ff',
           100: '#e0e7ff',
@@ -22,22 +34,6 @@ export default {
           800: '#3730a3',
           900: '#312e81',
           950: '#1e1b4b',
-        },
-        accent: {
-          50: '#faf5ff',
-          100: '#f3e8ff',
-          200: '#e9d5ff',
-          300: '#d8b4fe',
-          400: '#c084fc',
-          500: '#a855f7',
-          600: '#9333ea',
-          700: '#7e22ce',
-        },
-        surface: {
-          50: '#f0f2f8',
-          100: '#e8ecf4',
-          200: '#dde1ea',
-          300: '#c8cdd8',
         },
       },
       boxShadow: {

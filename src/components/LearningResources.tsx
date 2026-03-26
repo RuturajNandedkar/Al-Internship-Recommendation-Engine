@@ -256,25 +256,25 @@ export default function LearningResources({ results, userSkills }: LearningResou
   if (resources.length === 0 && bonusResources.length === 0) return null;
 
   const typeColors: Record<string, any> = {
-    Course: { background: 'linear-gradient(135deg, #dbeafe, #bfdbfe)', color: '#1d4ed8', border: '1px solid #93c5fd' },
-    Tutorial: { background: 'linear-gradient(135deg, #ede9fe, #ddd6fe)', color: '#7c3aed', border: '1px solid #c4b5fd' },
-    Certificate: { background: 'linear-gradient(135deg, #dcfce7, #bbf7d0)', color: '#15803d', border: '1px solid #86efac' },
-    Documentation: { background: 'linear-gradient(135deg, #cffafe, #a5f3fc)', color: '#0e7490', border: '1px solid #67e8f9' },
-    Interactive: { background: 'linear-gradient(135deg, #fce7f3, #fbcfe8)', color: '#be185d', border: '1px solid #f9a8d4' },
-    "Self-study": { background: 'rgba(241, 245, 249, 0.8)', color: '#64748b', border: '1px solid #e2e8f0' },
+    Course: { background: 'rgba(56, 189, 248, 0.1)', color: 'var(--accent3)', border: '1px solid rgba(56, 189, 248, 0.2)' },
+    Tutorial: { background: 'rgba(167, 139, 250, 0.1)', color: 'var(--accent2)', border: '1px solid rgba(167, 139, 250, 0.2)' },
+    Certificate: { background: 'rgba(16, 185, 129, 0.1)', color: 'var(--green)', border: '1px solid rgba(16, 185, 129, 0.2)' },
+    Documentation: { background: 'rgba(56, 189, 248, 0.05)', color: 'var(--accent3)', border: '1px solid rgba(56, 189, 248, 0.1)' },
+    Interactive: { background: 'rgba(244, 63, 94, 0.1)', color: 'var(--coral)', border: '1px solid rgba(244, 63, 94, 0.2)' },
+    "Self-study": { background: 'rgba(255, 255, 255, 0.05)', color: 'white/40', border: '1px solid rgba(255, 255, 255, 0.1)' },
   };
 
   return (
-    <div className="card-premium overflow-hidden animate-fadeIn">
+    <div className="card-premium overflow-hidden animate-fadeIn bg-surface/30 border border-white/5">
       {/* Header */}
-      <div className="px-7 py-6" style={{ background: 'linear-gradient(135deg, #10b981, #0d9488, #10b981)', backgroundSize: '200% 200%' }}>
+      <div className="px-7 py-6" style={{ background: 'linear-gradient(135deg, var(--surface2), var(--ink))' }}>
         <div className="flex items-center gap-4">
-          <div className="rounded-2xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', width: '52px', height: '52px' }}>
+          <div className="rounded-2xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', width: '52px', height: '52px' }}>
             <span className="text-2xl">📚</span>
           </div>
           <div>
-            <h3 className="text-white font-extrabold text-xl tracking-tight">Recommended Learning Resources</h3>
-            <p className="text-emerald-100/80 text-xs font-semibold">
+            <h3 className="text-white font-extrabold text-xl tracking-tight font-display">Recommended Learning Resources</h3>
+            <p className="text-white/40 text-xs font-bold uppercase tracking-widest">
               {resources.length > 0
                 ? `${resources.length} resources to fill your skill gaps`
                 : "Resources to strengthen your expertise"}
@@ -287,35 +287,34 @@ export default function LearningResources({ results, userSkills }: LearningResou
         {/* Gap-filling resources */}
         {resources.length > 0 && (
           <div className="space-y-4 mb-6">
-            <h4 className="text-sm font-bold text-gray-700 flex items-center gap-2">
-              <span className="w-6 h-6 rounded-lg flex items-center justify-center text-xs" style={{ background: 'linear-gradient(135deg, #fef2f2, #fecaca)' }}>🎯</span>
+            <h4 className="text-xs font-bold text-white/30 uppercase tracking-widest font-display flex items-center gap-2">
+              <span className="w-6 h-6 rounded-lg flex items-center justify-center text-xs" style={{ background: 'rgba(108, 99, 255, 0.1)', border: '1px solid rgba(108, 99, 255, 0.2)' }}>🎯</span>
               Priority Learning (Fill Skill Gaps)
             </h4>
             <div className="grid gap-4 sm:grid-cols-2">
               {resources.slice(0, 6).map((resource) => (
                 <div
                   key={resource.forSkill}
-                  className="group p-4 rounded-2xl transition-all duration-300 hover:shadow-md"
-                  style={{ background: 'rgba(248, 250, 252, 0.6)', border: '1px solid rgba(226, 232, 240, 0.5)' }}
+                  className="group p-4 rounded-2xl transition-all duration-300 hover:shadow-lg border border-white/5 bg-white/5"
                 >
                   <div className="flex items-start gap-3">
                     <span className="text-2xl flex-shrink-0 mt-0.5">{resource.icon}</span>
                     <div className="min-w-0 flex-1">
-                      <h5 className="text-sm font-bold text-gray-900 leading-snug">
+                      <h5 className="text-sm font-bold text-white leading-snug font-display">
                         {resource.title}
                       </h5>
                       <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                        <span className="text-[11px] text-gray-500 font-medium">{resource.platform}</span>
+                        <span className="text-[10px] text-white/30 font-bold uppercase tracking-widest">{resource.platform}</span>
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded-lg" style={typeColors[resource.type] || typeColors["Self-study"]}>
                           {resource.type}
                         </span>
-                        <span className="text-[10px] text-gray-400 font-medium">⏱ {resource.duration}</span>
+                        <span className="text-[10px] text-white/20 font-bold uppercase tracking-widest">⏱ {resource.duration}</span>
                       </div>
-                      <p className="text-xs text-gray-500 mt-2 leading-relaxed line-clamp-2">
+                      <p className="text-xs text-white/40 mt-2 leading-relaxed line-clamp-2 font-medium">
                         {resource.description}
                       </p>
                       <div className="mt-2.5">
-                        <span className="text-[10px] font-semibold px-2.5 py-1 rounded-lg" style={{ background: 'linear-gradient(135deg, #fef9c3, #fde68a)', color: '#a16207', border: '1px solid #fcd34d' }}>
+                        <span className="text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wider" style={{ background: 'rgba(245, 158, 11, 0.1)', color: 'var(--gold)', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
                           For: {resource.forSkill}
                         </span>
                       </div>
@@ -330,31 +329,30 @@ export default function LearningResources({ results, userSkills }: LearningResou
         {/* Bonus: strengthen existing skills */}
         {bonusResources.length > 0 && (
           <div className="space-y-4">
-            <h4 className="text-sm font-bold text-gray-700 flex items-center gap-2">
-              <span className="w-6 h-6 rounded-lg flex items-center justify-center text-xs" style={{ background: 'linear-gradient(135deg, #dbeafe, #bfdbfe)' }}>💪</span>
+            <h4 className="text-xs font-bold text-white/30 uppercase tracking-widest font-display flex items-center gap-2">
+              <span className="w-6 h-6 rounded-lg flex items-center justify-center text-xs" style={{ background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.2)' }}>💪</span>
               Strengthen Your Strengths
             </h4>
             <div className="grid gap-4 sm:grid-cols-2">
               {bonusResources.slice(0, 4).map((resource) => (
                 <div
                   key={resource.forSkill}
-                  className="p-4 rounded-2xl transition-all duration-300 hover:shadow-md"
-                  style={{ background: 'rgba(248, 250, 252, 0.6)', border: '1px solid rgba(226, 232, 240, 0.5)' }}
+                  className="p-4 rounded-2xl transition-all duration-300 hover:shadow-lg border border-white/5 bg-white/5"
                 >
                   <div className="flex items-start gap-3">
                     <span className="text-2xl flex-shrink-0 mt-0.5">{resource.icon}</span>
                     <div className="min-w-0 flex-1">
-                      <h5 className="text-sm font-bold text-gray-900 leading-snug">
+                      <h5 className="text-sm font-bold text-white leading-snug font-display">
                         {resource.title}
                       </h5>
                       <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                        <span className="text-[11px] text-gray-500 font-medium">{resource.platform}</span>
+                        <span className="text-[10px] text-white/30 font-bold uppercase tracking-widest">{resource.platform}</span>
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded-lg" style={typeColors[resource.type] || typeColors["Self-study"]}>
                           {resource.type}
                         </span>
-                        <span className="text-[10px] text-gray-400 font-medium">⏱ {resource.duration}</span>
+                        <span className="text-[10px] text-white/20 font-bold uppercase tracking-widest">⏱ {resource.duration}</span>
                       </div>
-                      <p className="text-xs text-gray-500 mt-2 leading-relaxed line-clamp-2">
+                      <p className="text-xs text-white/40 mt-2 leading-relaxed line-clamp-2 font-medium">
                         {resource.description}
                       </p>
                     </div>

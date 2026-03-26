@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.tsx";
 import Header from "../components/Header.tsx";
@@ -6,13 +6,14 @@ import CandidateForm from "../components/CandidateForm.tsx";
 import RecommendationList from "../components/RecommendationList.tsx";
 import ApiKeySetup from "../components/ApiKeySetup.tsx";
 import Footer from "../components/Footer.tsx";
-import SkeletonCard from "../components/SkeletonCard.tsx";
+import { SkeletonList } from "../components/SkeletonCard.tsx";
 import ErrorBoundary from "../components/ErrorBoundary.tsx";
 import OnboardingModal from "../components/OnboardingModal.tsx";
 import { translations, skillKeyMap, TranslationContent } from "../data/translations.ts";
 import { getRecommendations } from "../engine/recommendationEngine";
 import { getAIRecommendations, isAIAvailable, CandidateProfile, FrontendRecommendation } from "../services/aiService";
 import { getBackendRecommendations } from "../services/backendService";
+import { useScrollReveal } from "../hooks/useScrollReveal";
 
 /** Resolve skill indices to English skill name strings. */
 function resolveSkillNames(skillIndices: number[]): string[] {
@@ -29,6 +30,8 @@ export default function HomePage() {
   const [aiUsed, setAiUsed] = useState(false);
   const [aiReady, setAiReady] = useState(isAIAvailable());
   const [userSkills, setUserSkills] = useState<string[]>([]);
+
+  useScrollReveal();
 
   const t: TranslationContent = (translations as Record<string, TranslationContent>)[lang];
 
@@ -83,72 +86,102 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-mesh relative">
-      {/* Decorative orbs */}
-      <div className="orb orb-primary w-[400px] h-[400px] -top-48 -left-48 fixed" />
-      <div className="orb orb-purple w-[300px] h-[300px] top-1/3 -right-32 fixed" />
-      <div className="orb orb-blue w-[250px] h-[250px] bottom-20 left-1/4 fixed" />
-
       <Header t={t} currentLang={lang} onLangChange={setLang} />
 
-      {/* Auth Navigation Bar */}
-      <div className="max-w-3xl mx-auto px-5 pt-4 pb-1 flex justify-end gap-1.5 relative z-10">
-        <Link
-          to="/skill-gap"
-          className="text-sm text-gray-500 hover:text-primary-600 font-medium px-4 py-2 rounded-xl hover:bg-white/60 transition-all duration-300 backdrop-blur-sm"
-        >
-          Skill Gap Analysis
-        </Link>
-        {isAuthenticated ? (
-          <Link
-            to="/dashboard"
-            className="text-sm text-gray-500 hover:text-primary-600 font-medium px-4 py-2 rounded-xl hover:bg-white/60 transition-all duration-300 backdrop-blur-sm"
-          >
-            Dashboard
-          </Link>
-        ) : (
-          <>
-            <Link
-              to="/login"
-              className="text-sm text-gray-500 hover:text-primary-600 font-medium px-4 py-2 rounded-xl hover:bg-white/60 transition-all duration-300 backdrop-blur-sm"
-            >
-              Sign In
-            </Link>
-            <Link
-              to="/signup"
-              className="text-sm px-5 py-2 text-white rounded-xl font-semibold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-colored"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #4f46e5, #7c3aed)', boxShadow: '0 4px 15px rgba(79, 70, 229, 0.3)' }}
-            >
-              Sign Up
-            </Link>
-          </>
-        )}
-      </div>
-
-      <main className={`mx-auto px-5 py-10 relative z-10 ${showResults ? "max-w-3xl" : "max-w-2xl"}`}>
+      <main className={`relative z-10 ${showResults ? "max-w-6xl mx-auto px-5 py-10" : ""}`}>
         {!showResults ? (
-          <div className="animate-slideUp">
-            <div className="text-center mb-10">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 backdrop-blur-sm border border-primary-100/50 text-primary-600 text-sm font-medium mb-4 shadow-sm">
-                <span className="w-2 h-2 rounded-full bg-primary-400 animate-pulse" />
-                AI-Powered Matching
+          <div className="flex flex-col items-center">
+            {/* Hero Section */}
+            <section className="min-h-[90vh] w-full flex flex-col items-center justify-center text-center px-6 relative overflow-hidden">
+              {/* Floating Orbs - Specific for Hero */}
+              <div 
+                className="absolute top-1/4 -left-20 w-[400px] h-[400px] rounded-full blur-[100px] animate-float-hero pointer-events-none" 
+                style={{ background: 'rgba(108, 99, 255, 0.08)' }} 
+              />
+              <div 
+                className="absolute bottom-1/4 -right-20 w-[300px] h-[300px] rounded-full blur-[80px] animate-float-hero pointer-events-none" 
+                style={{ background: 'rgba(56, 189, 248, 0.06)', animationDelay: '-3s' }} 
+              />
+              <div 
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250px] h-[250px] rounded-full blur-[60px] animate-float-hero pointer-events-none" 
+                style={{ background: 'rgba(167, 139, 250, 0.07)', animationDelay: '-5s' }} 
+              />
+
+              <div className="relative z-10 animate-fadeIn space-y-8 max-w-4xl">
+                {/* Pill Badge */}
+                <div className="reveal inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md shadow-sm">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green animate-pulse-glow-green" />
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-[0.2em] text-accent">
+                    ✦ AI-Powered · TF-IDF · Cosine Similarity
+                  </span>
+                </div>
+
+                {/* Headline */}
+                <h1 className="reveal font-display font-extrabold text-white leading-[0.95] tracking-[-0.04em] text-[clamp(48px,8vw,90px)]">
+                  Find internships that<br />
+                  <span className="text-gradient-hero">actually fit you</span>
+                </h1>
+
+                {/* Subtitle */}
+                <p className="reveal text-[#9898b0] text-lg font-body font-light leading-[1.7] max-w-[560px] mx-auto">
+                  {t.tagline || "Our advanced AI engine analyzes your unique skill set to match you with opportunities that align with your career goals and potential."}
+                </p>
+
+                {/* CTAs */}
+                <div className="reveal flex flex-wrap items-center justify-center gap-5 pt-4">
+                  <button 
+                    onClick={() => document.getElementById('matching-form')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="px-9 py-4 rounded-xl bg-accent text-white font-display font-bold text-base shadow-[0_8px_32px_rgba(108,99,255,0.3)] hover:-translate-y-0.5 transition-all hover:shadow-[0_12px_40px_rgba(108,99,255,0.4)]"
+                  >
+                    Start Matching →
+                  </button>
+                  <button className="flex items-center gap-3 px-9 py-4 rounded-xl border border-white/10 bg-white/5 font-display font-bold text-base text-white hover:bg-white/10 transition-all">
+                    <div className="w-5 h-5 flex items-center justify-center rounded-full bg-white/10">
+                      <svg className="w-2.5 h-2.5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    </div>
+                    Watch Demo
+                  </button>
+                </div>
+
+                {/* Stats Bar */}
+                <div className="reveal pt-16 pb-8">
+                  <div className="inline-flex glass-dark p-1 rounded-2xl border border-white/5 shadow-2xl">
+                    <div className="flex flex-wrap items-center divide-x divide-white/5 px-2">
+                      {[
+                        { val: "50+", lab: "Internships" },
+                        { val: "12", lab: "Domains" },
+                        { val: "250+", lab: "Skills" },
+                        { val: "3", lab: "AI Engines" }
+                      ].map((stat, i) => (
+                        <div key={i} className="px-6 py-4 flex flex-col items-center">
+                          <span className="text-xl font-display font-black text-white leading-none">
+                            {stat.val}<span className="text-accent">.</span>
+                          </span>
+                          <span className="text-[10px] uppercase tracking-widest font-bold text-white/30 mt-1">
+                            {stat.lab}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
-              <p className="text-gray-500 text-base sm:text-lg font-medium max-w-lg mx-auto leading-relaxed">{t.tagline}</p>
-            </div>
+            </section>
 
-            <ApiKeySetup t={t} onKeySet={(ready: boolean) => setAiReady(ready)} />
-
-            <div className="card-premium p-7 sm:p-10 shadow-card">
-              <CandidateForm t={t} onSubmit={handleSubmit} />
-            </div>
+            {/* Matching Section (Candidate Form) */}
+            <section id="matching-form" className="reveal w-full max-w-2xl px-5 py-20">
+              <ApiKeySetup t={t} onKeySet={(ready: boolean = false) => setAiReady(ready)} />
+              <div className="card-premium p-7 sm:p-10 shadow-card">
+                <CandidateForm t={t} onSubmit={handleSubmit} />
+              </div>
+            </section>
           </div>
         ) : (
           <ErrorBoundary>
             {loading ? (
-              <div className="space-y-5 animate-fadeIn">
-                <p className="text-center text-sm font-semibold text-gray-400 mb-2">{t.aiAnalyzing}</p>
-                <SkeletonCard />
-                <SkeletonCard />
-                <SkeletonCard />
+              <div className="space-y-8 animate-fadeIn">
+                <p className="text-center text-sm font-mono font-bold uppercase tracking-widest text-accent mb-2 animate-pulse">{t.aiAnalyzing}</p>
+                <SkeletonList count={3} />
               </div>
             ) : (
               <div className="animate-slideUp">
