@@ -3,6 +3,7 @@ import { getRecommendations, RecommendationResult } from "../services/recommenda
 import { enhanceWithAI, isGeminiAvailable } from "../services/geminiService";
 import Profile from "../models/Profile";
 import RecommendationHistory from "../models/RecommendationHistory";
+import { AuthRequest } from "../middleware/auth";
 import asyncHandler from "../middleware/asyncHandler";
 import logger from "../utils/logger";
 import AppError from "../utils/AppError";
@@ -13,7 +14,7 @@ import AppError from "../utils/AppError";
  * @body    { skills, interests, preferred_domain, experience_level, location }
  * @access  Public (optionally authenticated for history tracking)
  */
-export const recommend = asyncHandler(async (req: Request, res: Response) => {
+export const recommend = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { skills, interests, preferred_domain, experience_level, location } = req.body;
 
   const profileData = {

@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { AuthRequest } from "../middleware/auth";
 import RecommendationFeedback from "../models/RecommendationFeedback";
 import AppError from "../utils/AppError";
 
@@ -10,7 +11,7 @@ import AppError from "../utils/AppError";
  * Auth is optional — userId is attached when present.
  */
 export const submitFeedback = async (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> => {

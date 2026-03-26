@@ -9,6 +9,17 @@ jest.mock("../models/Internship", () => ({
   find: jest.fn(),
 }));
 
+// Mock Redis
+jest.mock("../config/redis", () => ({
+  __esModule: true,
+  default: {
+    status: "ready",
+    get: jest.fn(),
+    set: jest.fn(),
+    on: jest.fn(),
+  },
+}));
+
 describe("recommendationService unit tests", () => {
   describe("buildIDF", () => {
     it("should calculate correct IDF values", () => {
@@ -24,8 +35,8 @@ describe("recommendationService unit tests", () => {
       expect(idf["javascript"]).toBeCloseTo(1.405, 3);
       
       // python appears in 1/3 docs
-      // idf = ln(3/1) + 1 ≈ 1.098 + 1 = 2.098
-      expect(idf["python"]).toBeCloseTo(2.098, 3);
+      // idf = ln(3/1) + 1 ≈ 1.0986 + 1 = 2.0986
+      expect(idf["python"]).toBeCloseTo(2.099, 3);
     });
 
     it("should handle empty or undefined skills", () => {

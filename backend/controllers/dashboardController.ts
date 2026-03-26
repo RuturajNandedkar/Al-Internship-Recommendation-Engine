@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import SavedRecommendation from "../models/SavedRecommendation";
+import { AuthRequest } from "../middleware/auth";
 import RecommendationHistory from "../models/RecommendationHistory";
 import Internship from "../models/Internship";
 import Profile from "../models/Profile";
@@ -11,7 +12,7 @@ import AppError from "../utils/AppError";
  * @route   GET /api/dashboard
  * @access  Private
  */
-export const getDashboard = asyncHandler(async (req: Request, res: Response) => {
+export const getDashboard = asyncHandler(async (req: AuthRequest, res: Response) => {
   if (!req.user) throw AppError.unauthorized("User not found");
   
   const userId = req.user._id;
@@ -128,7 +129,7 @@ function computeProfileCompleteness(profile: any) {
  * @route   GET /api/dashboard/history
  * @access  Private
  */
-export const getHistory = asyncHandler(async (req: Request, res: Response) => {
+export const getHistory = asyncHandler(async (req: AuthRequest, res: Response) => {
   if (!req.user) throw AppError.unauthorized("User not found");
   
   const page = Math.max(1, parseInt(req.query.page as string, 10) || 1);
@@ -161,7 +162,7 @@ export const getHistory = asyncHandler(async (req: Request, res: Response) => {
  * @route   GET /api/dashboard/saved
  * @access  Private
  */
-export const getSaved = asyncHandler(async (req: Request, res: Response) => {
+export const getSaved = asyncHandler(async (req: AuthRequest, res: Response) => {
   if (!req.user) throw AppError.unauthorized("User not found");
   
   const saved = await SavedRecommendation.find({ userId: req.user._id })
@@ -181,7 +182,7 @@ export const getSaved = asyncHandler(async (req: Request, res: Response) => {
  * @route   POST /api/dashboard/save
  * @access  Private
  */
-export const saveInternship = asyncHandler(async (req: Request, res: Response) => {
+export const saveInternship = asyncHandler(async (req: AuthRequest, res: Response) => {
   if (!req.user) throw AppError.unauthorized("User not found");
   
   const { internshipId, score, breakdown, reasoning } = req.body;
@@ -207,7 +208,7 @@ export const saveInternship = asyncHandler(async (req: Request, res: Response) =
  * @route   DELETE /api/dashboard/saved/:id
  * @access  Private
  */
-export const removeSaved = asyncHandler(async (req: Request, res: Response) => {
+export const removeSaved = asyncHandler(async (req: AuthRequest, res: Response) => {
   if (!req.user) throw AppError.unauthorized("User not found");
   
   const saved = await SavedRecommendation.findOneAndDelete({

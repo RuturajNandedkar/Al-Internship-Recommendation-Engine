@@ -13,11 +13,15 @@ interface JwtPayload {
   id: string;
 }
 
+export interface AuthRequest extends Request {
+  user?: IUser;
+}
+
 /**
  * Middleware: require a valid JWT token.
  * Attaches req.user with the authenticated user document.
  */
-export const protect = async (req: Request, _res: Response, next: NextFunction) => {
+export const protect = async (req: AuthRequest, _res: Response, next: NextFunction) => {
   try {
     let token: string | undefined;
 
@@ -57,7 +61,7 @@ export const protect = async (req: Request, _res: Response, next: NextFunction) 
  * Middleware: optionally attach user if token is present, but don't block.
  * Useful for routes that work for both authenticated and anonymous users.
  */
-export const optionalAuth = async (req: Request, _res: Response, next: NextFunction) => {
+export const optionalAuth = async (req: AuthRequest, _res: Response, next: NextFunction) => {
   try {
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith("Bearer ")) {
@@ -76,7 +80,7 @@ export const optionalAuth = async (req: Request, _res: Response, next: NextFunct
  * Must be used after protect().
  */
 export const authorize = (...roles: string[]) => {
-  return (req: Request, _res: Response, next: NextFunction) => {
+  return (req: AuthRequest, _res: Response, next: NextFunction) => {
     if (!req.user || !roles.includes(req.user.role)) {
       return next(AppError.forbidden("You do not have permission to perform this action."));
     }

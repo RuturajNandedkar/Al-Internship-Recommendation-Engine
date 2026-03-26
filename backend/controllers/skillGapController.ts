@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { AuthRequest } from "../middleware/auth";
 import { analyzeSkillGaps } from "../services/skillGapService";
 import RecommendationHistory from "../models/RecommendationHistory";
 import asyncHandler from "../middleware/asyncHandler";
@@ -9,7 +10,7 @@ import AppError from "../utils/AppError";
  * @route   POST /api/skill-gap
  * @access  Private
  */
-export const getSkillGapAnalysis = asyncHandler(async (req: Request, res: Response) => {
+export const getSkillGapAnalysis = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { skills, interests, experience_level, preferred_domain } = req.body;
 
   if (!skills || skills.length === 0) {

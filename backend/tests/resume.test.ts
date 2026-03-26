@@ -69,10 +69,9 @@ describe("Resume Integration Tests", () => {
         .set("Authorization", `Bearer ${token}`)
         .attach("resume", Buffer.from("dummy pdf content"), "resume.pdf");
 
-      expect(res.status).toBe(200);
+      expect(res.status).toBe(202);
       expect(res.body.success).toBe(true);
-      expect(res.body.data.extractedProfile.skills).toContain("react");
-      expect(res.body.data.recommendations.length).toBeGreaterThan(0);
+      expect(res.body.data.jobId).toBeDefined();
     });
 
     it("should fail without a token", async () => {

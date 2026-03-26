@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import User from "../models/User";
 import Profile from "../models/Profile";
-import { generateToken } from "../middleware/auth";
+import { generateToken, AuthRequest } from "../middleware/auth";
 import asyncHandler from "../middleware/asyncHandler";
 import AppError from "../utils/AppError";
 import logger from "../utils/logger";
@@ -11,7 +11,7 @@ import logger from "../utils/logger";
  * @route   POST /api/auth/signup
  * @access  Public
  */
-export const signup = asyncHandler(async (req: Request, res: Response) => {
+export const signup = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { name, email, password } = req.body;
 
   // Check for existing user
@@ -60,7 +60,7 @@ export const signup = asyncHandler(async (req: Request, res: Response) => {
  * @route   POST /api/auth/login
  * @access  Public
  */
-export const login = asyncHandler(async (req: Request, res: Response) => {
+export const login = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { email, password } = req.body;
 
   // Find user with password field included
@@ -97,7 +97,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
  * @route   GET /api/auth/me
  * @access  Private
  */
-export const getMe = asyncHandler(async (req: Request, res: Response) => {
+export const getMe = asyncHandler(async (req: AuthRequest, res: Response) => {
   if (!req.user) {
     throw AppError.unauthorized("User not found in request");
   }
@@ -114,7 +114,7 @@ export const getMe = asyncHandler(async (req: Request, res: Response) => {
  * @route   PUT /api/auth/me
  * @access  Private
  */
-export const updateMe = asyncHandler(async (req: Request, res: Response) => {
+export const updateMe = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { name, email } = req.body;
 
   if (!req.user) {

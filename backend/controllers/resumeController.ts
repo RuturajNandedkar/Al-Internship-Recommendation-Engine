@@ -6,6 +6,7 @@ import Profile from "../models/Profile";
 import { extractProfileFromResume, getFullResumeAnalysis } from "../services/resumeService";
 import { getRecommendations } from "../services/recommendationService";
 import RecommendationHistory from "../models/RecommendationHistory";
+import { AuthRequest } from "../middleware/auth";
 import asyncHandler from "../middleware/asyncHandler";
 import AppError from "../utils/AppError";
 import logger from "../utils/logger";
@@ -30,7 +31,7 @@ const upload = multer({
  * @route   POST /api/resume/upload
  * @access  Private
  */
-export const uploadResume = asyncHandler(async (req: Request, res: Response) => {
+export const uploadResume = asyncHandler(async (req: AuthRequest, res: Response) => {
   // Wrap multer in a promise
   await new Promise<void>((resolve, reject) => {
     upload(req, res, (err) => {
@@ -88,7 +89,7 @@ export const uploadResume = asyncHandler(async (req: Request, res: Response) => 
  * Helper: run multer upload and parse PDF buffer into text.
  * Returns { resumeText, fileName }.
  */
-async function parsePdfFromRequest(req: Request, res: Response) {
+async function parsePdfFromRequest(req: AuthRequest, res: Response) {
   await new Promise<void>((resolve, reject) => {
     upload(req, res, (err) => {
       if (err instanceof multer.MulterError) {
@@ -130,7 +131,7 @@ async function parsePdfFromRequest(req: Request, res: Response) {
  * @route   POST /api/resume/analyze
  * @access  Private
  */
-export const analyzeAndRecommend = asyncHandler(async (req: Request, res: Response) => {
+export const analyzeAndRecommend = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { resumeText, fileName } = await parsePdfFromRequest(req, res);
 
   // Enqueue AI parsing job
@@ -160,7 +161,7 @@ export const analyzeAndRecommend = asyncHandler(async (req: Request, res: Respon
  * @route   GET /api/resume/status/:jobId
  * @access  Private
  */
-export const getJobStatus = asyncHandler(async (req: Request, res: Response) => {
+export const getJobStatus = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { jobId } = req.params;
   const job = await Job.fromId(resumeQueue, jobId as string);
 

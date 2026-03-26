@@ -8,11 +8,11 @@ import {
   fetchHistory,
   uploadResume,
   DashboardStats,
-  SavedInternshipItem as SavedInternship,
-  RecommendationHistoryItem as RecommendationHistory,
+  SavedInternship,
+  RecommendationHistory,
   HistoryResponse,
   ResumeUploadResult
-} from "../services/dashboardService.ts";
+} from "../services/dashboardService";
 
 interface StatCardProps {
   label: string;
@@ -249,7 +249,7 @@ export default function DashboardPage() {
 
         {/* Tabs */}
         <div className="flex gap-1.5 mb-10 rounded-2xl p-2 shadow-card" style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(12px)', border: '1px solid rgba(226,232,240,0.5)' }}>
-          {tabs.map((tab: any) => (
+          {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
@@ -335,7 +335,7 @@ export default function DashboardPage() {
                   <div className="card-premium p-7">
                     <h3 className="font-extrabold text-gray-900 mb-5 tracking-tight">Your Top Skills</h3>
                     <div className="flex flex-wrap gap-2.5">
-                      {dashboard.topSkills.map((s: any) => (
+                      {dashboard.topSkills.map((s) => (
                         <span
                           key={s.skill}
                           className="px-4 py-2 rounded-xl text-sm font-semibold border transition-all duration-200 hover:shadow-sm cursor-default"
@@ -353,7 +353,7 @@ export default function DashboardPage() {
                   <div className="card-premium p-7">
                     <h3 className="font-extrabold text-gray-900 mb-5 tracking-tight">Recent Searches</h3>
                     <div className="space-y-2">
-                      {dashboard.recentSearches.map((s: any) => (
+                      {dashboard.recentSearches.map((s) => (
                         <div
                           key={s.id}
                           className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0"
@@ -394,16 +394,16 @@ export default function DashboardPage() {
                 </Link>
               </div>
             ) : (
-              saved.map((item: any) => (
+              saved.map((item) => (
                 <div
                   key={item._id}
                   className="card-premium p-5 flex items-start justify-between">
                   <div className="flex-1">
                     <h3 className="font-bold text-gray-900">
-                      {item.internshipId?.title || "Internship"}
+                      {(item.internshipId as any)?.title || "Internship"}
                     </h3>
                     <p className="text-sm text-gray-600">
-                      {item.internshipId?.company} • {item.internshipId?.location}
+                      {(item.internshipId as any)?.company} • {(item.internshipId as any)?.location}
                     </p>
                     <div className="flex items-center gap-3 mt-2">
                       <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-green-50 text-green-700">
@@ -572,9 +572,9 @@ export default function DashboardPage() {
                     Resume-based Recommendations
                   </h3>
                   <div className="space-y-3">
-                    {resumeResult.recommendations?.slice(0, 5).map((r: any, i: number) => (
+                    {resumeResult.recommendations?.slice(0, 5).map((r: any) => (
                       <div
-                        key={i}
+                        key={r.id || Math.random()}
                         className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0"
                       >
                         <div>

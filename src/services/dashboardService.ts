@@ -31,6 +31,10 @@ export interface DashboardStats {
   topSkills: Array<{ skill: string; count: number }>;
 }
 
+// Aliases for better compatibility
+export type SavedInternship = SavedInternshipItem;
+export type RecommendationHistory = RecommendationHistoryItem;
+
 export interface RecommendationHistoryItem {
   _id: string;
   userId: string;
