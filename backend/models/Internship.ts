@@ -29,6 +29,7 @@ export interface IInternship extends Document {
   duration: string;
   application_link: string;
   description: string;
+  postedDate?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -103,6 +104,10 @@ const internshipSchema = new Schema<IInternship>(
       required: [true, "Description is required"],
       trim: true,
     },
+    postedDate: {
+      type: Date,
+      default: Date.now,
+    },
   },
   { timestamps: true }
 );
@@ -114,6 +119,15 @@ internshipSchema.index({
   domain: "text",
   description: "text",
 });
+
+// Domain and Location index for faster filtering
+internshipSchema.index({ domain: 1, location: 1 });
+
+// Skills index
+internshipSchema.index({ required_skills: 1 });
+
+// Posted date index (descending)
+internshipSchema.index({ postedDate: -1 });
 
 const Internship: Model<IInternship> = mongoose.model<IInternship>(
   "Internship",

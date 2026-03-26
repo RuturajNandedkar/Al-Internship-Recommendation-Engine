@@ -60,6 +60,12 @@ const savedRecommendationSchema = new Schema<ISavedRecommendation>(
   { timestamps: true }
 );
 
+// Prevent duplicate saves of the same internship for the same user
+savedRecommendationSchema.index(
+  { userId: 1, internshipId: 1 },
+  { unique: true }
+);
+
 // Prevent duplicate saves of the same internship for the same profile
 savedRecommendationSchema.index(
   { profileId: 1, internshipId: 1 },

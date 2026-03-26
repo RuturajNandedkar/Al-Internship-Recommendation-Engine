@@ -4,18 +4,41 @@ import SavedRecommendation from "../models/SavedRecommendation";
 import AppError from "../utils/AppError";
 
 /**
- * @desc    Get all internships
+ * @desc    Get all internships with pagination and filtering
  * @route   GET /api/internships
  * @access  Public
  */
-export const getAllInternships = async (_req: Request, res: Response, next: NextFunction) => {
+export const getAllInternships = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const internships = await Internship.find({}).sort({ internshipId: 1 });
+    // 1. Parse and validate query parameters
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    let limit = Math.max(1, parseInt(req.query.limit as string) || 20);
+    if (limit > 100) limit = 100;
+
+    const { domain, location } = req.query;
+
+    // 2. Build query object
+    const query: any = {};
+    if (domain) query.domain = domain;
+    if (location) query.location = { $regex: location, $options: "i" }; // Case-insensitive search
+
+    // 3. Execute query with pagination
+    const total = await Internship.countDocuments(query);
+    const totalPages = Math.ceil(total / limit);
+    const skip = (page - 1) * limit;
+
+    const internships = await Internship.find(query)
+      .sort({ postedDate: -1, createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
     res.status(200).json({
       success: true,
-      count: internships.length,
       data: internships,
+      total,
+      page,
+      totalPages,
+      count: internships.length, // Keep for backward compatibility
     });
   } catch (error) {
     next(error);

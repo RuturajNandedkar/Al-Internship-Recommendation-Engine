@@ -87,6 +87,9 @@ const recommendationHistorySchema = new Schema<IRecommendationHistory>(
   { timestamps: true }
 );
 
+// Compound index for user history retrieval (most recent first)
+recommendationHistorySchema.index({ userId: 1, createdAt: -1 });
+
 const RecommendationHistory: Model<IRecommendationHistory> =
   mongoose.model<IRecommendationHistory>(
     "RecommendationHistory",
