@@ -20,6 +20,7 @@ import internshipRoutes from "./routes/internshipRoutes";
 import aiRecommendationRoutes from "./routes/aiRecommendationRoutes";
 import dashboardRoutes from "./routes/dashboardRoutes";
 import skillGapRoutes from "./routes/skillGapRoutes";
+import aiRoutes from "./routes/aiRoutes";
 import resumeRoutes from "./routes/resumeRoutes";
 
 // ─── Initialize Express ─────────────────────────────────────────────────────
@@ -119,6 +120,7 @@ app.use("/api/internships", internshipRoutes);
 app.use("/api/ai-recommendation", aiLimiter, aiRecommendationRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/skill-gap", aiLimiter, skillGapRoutes);
+app.use("/api/ai", aiLimiter, aiRoutes);
 app.use("/api/resume", aiLimiter, resumeRoutes);
 
 // ─── Health Check ───────────────────────────────────────────────────────────

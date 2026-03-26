@@ -79,147 +79,62 @@ export interface FrontendRecommendation {
 
 // ─── Module-level state ─────────────────────────────────────────────────────
 
-let currentApiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
-let genAI: GoogleGenerativeAI | null = null;
-let model: GenerativeModel | null = null;
-
-function getModel(): GenerativeModel | null {
-  if (!currentApiKey || currentApiKey === "your_gemini_api_key_here") return null;
-  if (!genAI) {
-    genAI = new GoogleGenerativeAI(currentApiKey);
-    model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-  }
-  return model;
-}
-
-export function setApiKey(key: string): void {
-  currentApiKey = key;
-  genAI = null;
-  model = null;
-}
-
-export function getApiKey(): string {
-  return currentApiKey;
-}
-
-function buildProfileSummary(profile: CandidateProfile): ProfileSummary {
-  const { education, field, skills, sector, locationIdx, modeIdx } = profile;
-
-  const englishSkills = Object.keys(skillKeyMap);
-  const selectedSkills = skills
-    .map((idx) => englishSkills[idx])
-    .filter(Boolean) as string[];
-
-  const location = stateKeyMap[locationIdx] || "Any Location";
-  const mode = modeKeyMap[modeIdx] || "Any Mode";
-
-  return {
-    education,
-    field,
-    skills: selectedSkills,
-    sector: sector === "all" ? "Open to all sectors" : sector,
-    location,
-    mode,
-  };
-}
-
-function buildInternshipSummaries(): InternshipSummary[] {
-  return (internships as Internship[]).map((i: Internship) => ({
-    id: i.id,
-    title: i.title,
-    company: i.company,
-    sector: i.sector,
-    skills: i.skills,
-    education: i.education,
-    location: i.location,
-    state: i.state,
-    duration: i.duration,
-    stipend: i.stipend,
-    mode: i.mode,
-    description: i.description,
-  }));
-}
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
 export async function getAIRecommendations(
   profile: CandidateProfile,
   maxResults: number = 5
 ): Promise<FrontendRecommendation[] | null> {
-  const ai = getModel();
-  if (!ai) return null;
-
-  const profileSummary = buildProfileSummary(profile);
-  const internshipList = buildInternshipSummaries();
-
-  const prompt = `You are an intelligent internship recommendation engine. Analyze the candidate's profile and rank the most suitable internships from the provided list.
-
-CANDIDATE PROFILE:
-- Education Level: ${profileSummary.education}
-- Field of Study: ${profileSummary.field}
-- Skills: ${profileSummary.skills.join(", ")}
-- Preferred Sector: ${profileSummary.sector}
-- Preferred Location: ${profileSummary.location}
-- Work Mode Preference: ${profileSummary.mode}
-
-AVAILABLE INTERNSHIPS:
-${JSON.stringify(internshipList, null, 2)}
-
-TASK: Select the top ${maxResults} most suitable internships for this candidate. For each selected internship, provide:
-1. The internship ID
-2. A match score from 0 to 100 (be realistic and differentiated — don't give similar scores)
-3. A brief 1-2 sentence personalized reasoning explaining WHY this internship is a good fit
-4. A breakdown of how well each factor matches (each 0-100):
-   - skills: how well the candidate's skills match the internship requirements
-   - field: how well their field of study aligns
-   - sector: how well the sector matches their preference
-   - location: how well the location matches
-   - mode: how well the work mode matches
-
-IMPORTANT: Return ONLY valid JSON, no markdown, no code blocks. Use this exact format:
-[
-  {
-    "id": 1,
-    "score": 85,
-    "reasoning": "Your skills in Python and programming align perfectly with this software development role...",
-    "breakdown": { "skills": 90, "field": 85, "sector": 80, "location": 70, "mode": 95 }
-  }
-]
-
-Sort by score descending. Return exactly ${maxResults} results.`;
-
-  const result = await ai.generateContent(prompt);
-  const response = result.response;
-  const text = response.text().trim();
-
-  // Parse JSON — strip code fences if present
-  const cleaned = text.replace(/```json\s*/gi, "").replace(/```\s*/gi, "").trim();
-  const parsed: AIRecommendation[] = JSON.parse(cleaned);
-
-  if (!Array.isArray(parsed)) throw new Error("AI response is not an array");
-
-  // Merge AI results with full internship data
-  const recommendations: FrontendRecommendation[] = [];
-
-  for (const rec of parsed) {
-    const internship = (internships as Internship[]).find((i: Internship) => i.id === rec.id);
-    if (!internship) continue;
-
-    recommendations.push({
-      ...internship,
-      score: Math.max(0, Math.min(100, Math.round(rec.score))),
-      reasoning: rec.reasoning || "",
-      breakdown: {
-        skills: Math.round(rec.breakdown?.skills || 0),
-        field: Math.round(rec.breakdown?.field || 0),
-        sector: Math.round(rec.breakdown?.sector || 0),
-        location: Math.round(rec.breakdown?.location || 0),
-        mode: Math.round(rec.breakdown?.mode || 0),
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/ai/recommend`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
+      body: JSON.stringify({ ...profile, maxResults }),
     });
-  }
 
-  return recommendations.sort((a, b) => b.score - a.score);
+    if (!res.ok) {
+      throw new Error(`AI recommendation failed: ${res.statusText}`);
+    }
+
+    const json = await res.json();
+    if (!json.success || !Array.isArray(json.data)) {
+      throw new Error("Invalid response format from AI backend");
+    }
+
+    const parsed: AIRecommendation[] = json.data;
+
+    // Merge AI results with full internship data
+    const recommendations: FrontendRecommendation[] = [];
+
+    for (const rec of parsed) {
+      const internship = (internships as Internship[]).find((i: Internship) => i.id === Number(rec.id) || i.id === rec.id);
+      if (!internship) continue;
+
+      recommendations.push({
+        ...internship,
+        score: Math.max(0, Math.min(100, Math.round(rec.score))),
+        reasoning: rec.reasoning || "",
+        breakdown: {
+          skills: Math.round(rec.breakdown?.skills || (rec.breakdown as any)?.skill_match || 0),
+          field: Math.round(rec.breakdown?.field || (rec.breakdown as any)?.domain_match || 0),
+          sector: Math.round(rec.breakdown?.sector || (rec.breakdown as any)?.interest_match || 0),
+          location: Math.round(rec.breakdown?.location || (rec.breakdown as any)?.location_match || 0),
+          mode: Math.round(rec.breakdown?.mode || (rec.breakdown as any)?.experience_fit || 50),
+        },
+      });
+    }
+
+    return recommendations.sort((a, b) => b.score - a.score);
+  } catch (error) {
+    console.error("Error fetching AI recommendations:", error);
+    return null;
+  }
 }
 
 export function isAIAvailable(): boolean {
-  return !!getModel();
+  // Now that it's backend-powered, we could check backend health, 
+  // but for now we'll assume it's available if we can reach the backend.
+  return true; 
 }

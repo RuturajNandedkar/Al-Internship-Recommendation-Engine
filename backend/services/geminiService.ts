@@ -199,7 +199,7 @@ Sort by score descending. Return ALL internships provided.`;
         missingSkills: aiItem.skills_to_learn || (original.missingSkills as string[]) || [],
         aiEnhanced: true,
         confidence: (original.confidence as number) || 80,
-      });
+      } as EnhancedInternship);
     }
 
     enhanced.sort((a, b) => b.score - a.score);
@@ -212,4 +212,106 @@ Sort by score descending. Return ALL internships provided.`;
   }
 }
 
-export { enhanceWithAI, isGeminiAvailable };
+/**
+ * Generate a complete set of AI recommendations from scratch using the full internship list.
+ * This mirrors the logic previously found in the frontend aiService.ts.
+ */
+async function generatePureAIRecommendations(
+  profile: InternshipProfile,
+  internshipList: InternshipInput[],
+  maxResults: number = 5
+): Promise<EnhancedInternship[] | null> {
+  const ai = getModel();
+  if (!ai) return null;
+
+  const {
+    skills = [],
+    interests = [],
+    preferred_domain,
+    experience_level,
+    location,
+  } = profile;
+
+  const prompt = `You are an intelligent internship recommendation engine. Analyze the candidate's profile and rank the most suitable internships from the provided list.
+
+CANDIDATE PROFILE:
+- Skills: ${skills.join(", ")}
+- Interests: ${interests.join(", ")}
+- Preferred Domain: ${preferred_domain || "Open to all"}
+- Experience Level: ${experience_level || "beginner"}
+- Preferred Location: ${location || "Any"}
+
+AVAILABLE INTERNSHIPS:
+${JSON.stringify(internshipList, null, 2)}
+
+TASK: Select the top ${maxResults} most suitable internships for this candidate. For each selected internship, provide:
+1. The internship ID (exactly as given in the _id field)
+2. A match score from 0 to 100 (be realistic and differentiated — don't give similar scores)
+3. A brief 1-2 sentence personalized reasoning explaining WHY this internship is a good fit
+4. A breakdown of match factors (each 0-100):
+   - skill_match: how well the candidate's skills match the internship requirements
+   - domain_match: how well their domain/field aligns
+   - interest_match: how well the interest matches
+   - location_match: how well the location matches
+   - experience_fit: how well the experience level fits
+   - growth_potential: how much the student can learn and grow
+
+IMPORTANT: Return ONLY valid JSON, no markdown, no code blocks. Use this exact format:
+[
+  {
+    "_id": "...",
+    "score": 85,
+    "reasoning": "...",
+    "breakdown": { "skill_match": 90, "domain_match": 85, "interest_match": 80, "location_match": 70, "experience_fit": 95, "growth_potential": 90 }
+  }
+]
+
+Sort by score descending. Return exactly ${maxResults} results.`;
+
+  try {
+    const result = await ai.generateContent(prompt);
+    const text = result.response.text().trim();
+    const cleaned = text.replace(/```json\s*/gi, "").replace(/```\s*/gi, "").trim();
+    const parsed: AIEnhancedResult[] = JSON.parse(cleaned);
+
+    if (!Array.isArray(parsed)) {
+      logger.warn("Gemini returned non-array response in pure AI mode");
+      return null;
+    }
+
+    const recommendations: EnhancedInternship[] = [];
+
+    for (const rec of parsed) {
+      const internship = internshipList.find(
+        (i: InternshipInput) => String(i._id) === String(rec._id)
+      );
+      if (!internship) continue;
+
+      recommendations.push({
+        ...internship,
+        score: Math.max(0, Math.min(100, Math.round(rec.score))),
+        reasoning: rec.reasoning || "",
+        breakdown: {
+          skill_match: Math.round(rec.breakdown?.skill_match || 0),
+          domain_match: Math.round(rec.breakdown?.domain_match || 0),
+          interest_match: Math.round(rec.breakdown?.interest_match || 0),
+          location_match: Math.round(rec.breakdown?.location_match || 0),
+          experience_fit: Math.round(rec.breakdown?.experience_fit || 0),
+          growth_potential: Math.round(rec.breakdown?.growth_potential || 0),
+        },
+        matchedSkills: rec.matched_skills || [],
+        missingSkills: rec.skills_to_learn || [],
+        aiEnhanced: true,
+        confidence: 90,
+      } as EnhancedInternship);
+    }
+
+    return recommendations.sort((a, b) => b.score - a.score);
+  } catch (err: unknown) {
+    const errMsg = err instanceof Error ? err.message : String(err);
+    logger.error("Gemini pure AI recommendation failed", { error: errMsg });
+    return null;
+  }
+}
+
+export { enhanceWithAI, isGeminiAvailable, generatePureAIRecommendations };
