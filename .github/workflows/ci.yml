@@ -24,11 +24,10 @@ jobs:
         cache: 'npm'
 
     - name: Install Frontend Dependencies
-      run: npm install --legacy-peer-deps
+      run: npm ci --legacy-peer-deps
 
     - name: Run Frontend Lint
-      run: npx eslint src --ext .ts,.tsx --quiet --max-warnings=0 || true
-      continue-on-error: true
+      run: npx eslint src --ext .ts,.tsx --quiet
 
     - name: Run Frontend Tests
       run: npm test -- --passWithNoTests
@@ -38,12 +37,11 @@ jobs:
 
     - name: Install Backend Dependencies
       working-directory: ./backend
-      run: npm install --legacy-peer-deps
+      run: npm ci --legacy-peer-deps
 
     - name: Run Backend Lint
       working-directory: ./backend
-      run: npx eslint . --ext .ts --quiet --max-warnings=0 || true
-      continue-on-error: true
+      run: npx eslint . --ext .ts --quiet
 
     - name: Run Backend Tests
       working-directory: ./backend
