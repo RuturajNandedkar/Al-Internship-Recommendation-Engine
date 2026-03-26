@@ -235,6 +235,33 @@ al-internship-recommendation-engine/
 
 ## 🚀 Getting Started
 
+### 🐳 Quick Start with Docker
+
+The easiest way to get the full stack running (Frontend, Backend, MongoDB, Redis) is using Docker Compose.
+
+#### Prerequisites
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running.
+
+#### Spin up the application
+1. Clone the repository (if you haven't already).
+2. Configure your `.env` files (see [Backend Setup](#1-backend-setup) for details).
+3. Run the following command in the root directory:
+   ```bash
+   docker compose up --build
+   ```
+4. Access the application:
+   - **Frontend:** http://localhost:80
+   - **Backend API:** http://localhost:5000/api
+   - **Health Check:** http://localhost:5000/api/health
+
+#### Production Deployment
+To run with production overrides (restart policies, etc.):
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+```
+
+### Local Development Setup
+
 ### Prerequisites
 
 - **Node.js** v16+ — [Download](https://nodejs.org/)

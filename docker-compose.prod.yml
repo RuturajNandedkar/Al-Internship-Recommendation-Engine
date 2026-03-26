@@ -1,0 +1,14 @@
+services:
+  frontend:
+    restart: always
+
+  backend:
+    restart: always
+    environment:
+      - NODE_ENV=production
+
+  mongodb:
+    restart: always
+
+  redis:
+    restart: always
