@@ -73,7 +73,7 @@ export interface FrontendRecommendation {
   reasoning: string;
   matchedSkills?: string[];
   missingSkills?: string[];
-  aiEnhanced?: boolean;
+  application_link?: string;
   breakdown: BreakdownScores;
 }
 
@@ -114,6 +114,7 @@ export async function getAIRecommendations(
 
       recommendations.push({
         ...internship,
+        application_link: internship.application_link,
         score: Math.max(0, Math.min(100, Math.round(rec.score))),
         reasoning: rec.reasoning || "",
         breakdown: {

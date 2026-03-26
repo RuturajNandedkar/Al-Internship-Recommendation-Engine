@@ -1,4 +1,7 @@
 import OpenAI from "openai";
+import redis from "../config/redis";
+import crypto from "crypto";
+import logger from "../utils/logger";
 
 // ─── Interfaces ─────────────────────────────────────────────────────────────
 
@@ -83,6 +86,25 @@ async function generateAIRecommendation(
 
   const { skills = [], interests = [], experience = "Beginner" } = profile;
 
+  // 1. Check Redis Cache
+  const profileHash = crypto
+    .createHash("md5")
+    .update(JSON.stringify({ skills, interests, experience }))
+    .digest("hex");
+  const cacheKey = `ai:recommendations:${profileHash}`;
+
+  try {
+    if (redis.status === "ready") {
+      const cached = await redis.get(cacheKey);
+      if (cached) {
+        logger.info("Serving AI recommendations from cache", { profileHash });
+        return JSON.parse(cached);
+      }
+    }
+  } catch (err: any) {
+    logger.error("Redis AI cache get error", { error: err.message });
+  }
+
   const prompt = `You are an expert career advisor specializing in tech internships.
 
 Given the following student profile, provide structured internship recommendations.
@@ -135,6 +157,8 @@ Requirements:
     ],
     temperature: 0.7,
     max_tokens: 1500,
+  }, {
+    timeout: 15000, // 15 second timeout
   });
 
   const text = completion.choices[0].message.content?.trim() || "";
@@ -147,6 +171,16 @@ Requirements:
 
   if (!parsed.top_roles || !parsed.suggested_companies || !parsed.skill_gaps) {
     throw new Error("AI response missing required fields");
+  }
+
+  // 2. Save to Redis Cache (1 hour)
+  try {
+    if (redis.status === "ready") {
+      await redis.set(cacheKey, JSON.stringify(parsed), "EX", 3600);
+      logger.info("AI recommendations cached", { profileHash });
+    }
+  } catch (err: any) {
+    logger.error("Redis AI cache set error", { error: err.message });
   }
 
   return parsed;

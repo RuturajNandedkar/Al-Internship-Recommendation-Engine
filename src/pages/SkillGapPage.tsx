@@ -114,7 +114,7 @@ export default function SkillGapPage() {
         </div>
 
         {/* Input Form */}
-        <div className="reveal card-premium p-8 sm:p-9 mb-10">
+        <div className="reveal card-premium p-8 md:p-12 mb-10">
           {error && (
             <div className="mb-6 p-4 rounded-2xl text-sm font-bold flex items-center gap-2.5 bg-coral/10 border border-coral/20 text-coral">
               <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -198,23 +198,27 @@ export default function SkillGapPage() {
         {analysis && !loading && (
           <div className="space-y-12">
             {/* Analysis Summary Header */}
-            <div className="reveal bg-[#12121c] border border-white/5 rounded-[24px] p-8 sm:p-10 relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-8">
-                <div className={`text-[48px] font-display font-black leading-none opacity-20 ${
-                  analysis.readiness_score >= 70 ? "text-green" : analysis.readiness_score >= 40 ? "text-gold" : "text-coral"
-                }`}>
-                  {analysis.readiness_score}%
+            <div className="reveal bg-[#12121c] border border-white/5 rounded-[24px] p-8 sm:p-10 relative overflow-hidden group">
+              <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-accent to-accent3 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="flex flex-col md:flex-row justify-between items-center gap-8 relative z-10">
+                <div className="max-w-2xl text-center md:text-left">
+                  <h2 className="text-[24px] font-display font-bold text-white mb-4">Analysis Summary</h2>
+                  <p className="text-[16px] text-[#9898b0] leading-relaxed">
+                    {analysis.summary}
+                  </p>
+                  <div className="mt-6 flex flex-wrap items-center justify-center md:justify-start gap-4">
+                    <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[12px] font-bold text-white/40 uppercase tracking-widest font-mono">
+                      Ready for {domain === "all" ? "Market" : domain}
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <div className="relative z-10 max-w-2xl">
-                <h2 className="text-[24px] font-display font-bold text-white mb-4">Analysis Summary</h2>
-                <p className="text-[16px] text-[#9898b0] leading-relaxed">
-                  {analysis.summary}
-                </p>
-                <div className="mt-6 flex items-center gap-4">
-                  <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[12px] font-bold text-white/40 uppercase tracking-widest font-mono">
-                    Ready for {domain === "all" ? "Market" : domain}
-                  </span>
+                <div className="flex-shrink-0">
+                  <div className={`text-[64px] font-display font-black leading-none ${
+                    analysis.readiness_score >= 70 ? "text-green" : analysis.readiness_score >= 40 ? "text-gold" : "text-coral"
+                  }`}>
+                    {analysis.readiness_score}%
+                  </div>
+                  <div className="text-[10px] text-[#5a5a78] font-mono font-bold uppercase tracking-widest text-center mt-2">Match Score</div>
                 </div>
               </div>
             </div>

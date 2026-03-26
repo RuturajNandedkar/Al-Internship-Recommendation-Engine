@@ -12,6 +12,7 @@ export interface Internship {
   mode: "Hybrid" | "On-site" | "Remote";
   description: string;
   icon: string;
+  application_link?: string;
 }
 
 const internships: Internship[] = [

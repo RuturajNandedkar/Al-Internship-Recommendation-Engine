@@ -11,17 +11,36 @@ export const useScrollReveal = () => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           entry.target.classList.add('visible');
-          // Once visible, we can unobserve if we only want it to happen once
-          // observer.unobserve(entry.target);
         }
       });
     }, observerOptions);
 
-    const revealElements = document.querySelectorAll('.reveal');
-    revealElements.forEach((el) => observer.observe(el));
+    const observeAll = () => {
+      document.querySelectorAll('.reveal:not(.visible)').forEach((el) => {
+        observer.observe(el);
+      });
+    };
+
+    // Initial observation
+    observeAll();
+
+    // Observe for new elements being added to the DOM
+    const mutationObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.addedNodes.length > 0) {
+          observeAll();
+        }
+      });
+    });
+
+    mutationObserver.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
 
     return () => {
-      revealElements.forEach((el) => observer.unobserve(el));
+      observer.disconnect();
+      mutationObserver.disconnect();
     };
   }, []);
 };

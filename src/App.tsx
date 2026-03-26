@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
@@ -14,24 +14,39 @@ const PageWrapper = ({ children }: { children: React.ReactNode }) => {
   const [transitionStage, setTransitionStage] = useState("fadeIn");
 
   useEffect(() => {
-    if (location !== displayLocation) {
+    if (location.pathname !== displayLocation.pathname) {
       setTransitionStage("fadeOut");
+      
+      // Fallback timer in case onTransitionEnd doesn't fire
+      const timer = setTimeout(() => {
+        handleTransitionEnd();
+      }, 350);
+      
+      return () => clearTimeout(timer);
     }
   }, [location, displayLocation]);
 
-  const onAnimationEnd = () => {
+  const handleTransitionEnd = () => {
     if (transitionStage === "fadeOut") {
       setTransitionStage("fadeIn");
       setDisplayLocation(location);
+      window.scrollTo(0, 0);
     }
   };
 
   return (
     <div
-      className={transitionStage === "fadeIn" ? "page-transition" : "opacity-0 -translate-y-[10px] transition-all duration-250"}
-      onAnimationEnd={onAnimationEnd}
+      onTransitionEnd={handleTransitionEnd}
+      className={`transition-all duration-300 ease-in-out ${
+        transitionStage === "fadeOut" 
+          ? "opacity-0 -translate-y-4" 
+          : "opacity-100 translate-y-0"
+      }`}
     >
-      {children}
+      {/* Pass the displayLocation to Routes to handle exit transitions correctly */}
+      <div className="page-wrapper-inner">
+        {React.cloneElement(children as React.ReactElement, { location: displayLocation })}
+      </div>
     </div>
   );
 };

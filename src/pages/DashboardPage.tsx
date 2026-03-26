@@ -29,7 +29,7 @@ interface StatCardProps {
 
 function StatCard({ label, value, icon, delta, trend = "up", progress = 70 }: StatCardProps) {
   return (
-    <div className="reveal bg-[#12121c] border border-white/5 rounded-[16px] p-6 relative overflow-hidden group transition-all duration-300 hover:border-white/10 hover:shadow-xl">
+    <div className="reveal bg-[#12121c] border border-white/5 rounded-[24px] p-8 relative overflow-hidden group transition-all duration-300 hover:border-white/10 hover:shadow-xl">
       <div className="flex justify-between items-start mb-4">
         <span className="text-[11px] font-mono font-bold uppercase tracking-[0.1em] text-[#5a5a78]">
           {label}

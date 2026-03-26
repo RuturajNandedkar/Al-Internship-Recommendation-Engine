@@ -1,4 +1,5 @@
-import { useState, ChangeEvent, FormEvent, useRef } from "react";
+import { useState, ChangeEvent, FormEvent, useRef, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import StepIndicator from "./StepIndicator.tsx";
 import { TranslationContent } from "../data/translations.ts";
 import { CandidateProfile } from "../services/aiService";
@@ -9,7 +10,17 @@ interface CandidateFormProps {
 }
 
 export default function CandidateForm({ t, onSubmit }: CandidateFormProps) {
-  const [step, setStep] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const step = parseInt(searchParams.get("step") || "1");
+
+  const setStep = (s: number) => {
+    setSearchParams(prev => {
+      prev.set("step", s.toString());
+      return prev;
+    });
+    // Smooth scroll to top of form
+    document.getElementById('matching-form')?.scrollIntoView({ behavior: 'smooth' });
+  };
   const [formData, setFormData] = useState<CandidateProfile>({
     education: "",
     field: "",
@@ -69,7 +80,7 @@ export default function CandidateForm({ t, onSubmit }: CandidateFormProps) {
   const labelClasses = "block text-[12px] font-mono font-bold uppercase tracking-[0.15em] text-[#9898b0] mb-3";
 
   return (
-    <div className="bg-[#12121c] border border-white/5 rounded-[20px] p-[48px] shadow-[0_40px_80px_rgba(0,0,0,0.5)] relative overflow-hidden">
+    <div className="bg-[#12121c] border border-white/5 rounded-[24px] p-8 md:p-12 shadow-[0_40px_80px_rgba(0,0,0,0.5)] relative overflow-hidden">
       {/* Background radial accent */}
       <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-accent/5 rounded-full blur-[100px] -mr-48 -mt-48 pointer-events-none" />
 
@@ -196,11 +207,11 @@ export default function CandidateForm({ t, onSubmit }: CandidateFormProps) {
               </div>
             </div>
 
-            <div className="flex gap-4">
+            <div className="flex gap-6 mt-12">
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className="flex-1 py-5 rounded-2xl border border-white/10 text-white font-bold hover:bg-white/5 transition-all"
+                className="flex-1 py-5 rounded-2xl border border-white/10 text-white font-bold hover:bg-white/5 transition-all text-sm uppercase tracking-widest font-mono"
               >
                 {t.back}
               </button>
@@ -208,9 +219,9 @@ export default function CandidateForm({ t, onSubmit }: CandidateFormProps) {
                 type="button"
                 onClick={() => setStep(3)}
                 disabled={!canProceedStep2}
-                className="flex-[2] py-5 rounded-2xl bg-accent text-white font-display font-bold text-lg shadow-[0_8px_32px_rgba(108,99,255,0.3)] hover:-translate-y-0.5 transition-all disabled:opacity-30"
+                className="flex-1 py-5 rounded-2xl bg-accent text-white font-display font-bold text-base shadow-[0_8px_32px_rgba(108,99,255,0.3)] hover:-translate-y-0.5 transition-all disabled:opacity-30 disabled:translate-y-0"
               >
-                {t.next}
+                {t.next} →
               </button>
             </div>
           </div>
@@ -263,7 +274,7 @@ export default function CandidateForm({ t, onSubmit }: CandidateFormProps) {
 
             <div>
               <label className={labelClasses}>{t.modeLabel}</label>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {t.modeOptions.map((mode, idx) => {
                   const isSelected = formData.modeIdx === idx;
                   return (
@@ -284,17 +295,17 @@ export default function CandidateForm({ t, onSubmit }: CandidateFormProps) {
               </div>
             </div>
 
-            <div className="flex gap-4 pt-4">
+            <div className="flex gap-6 mt-12">
               <button
                 type="button"
                 onClick={() => setStep(2)}
-                className="flex-1 py-5 rounded-2xl border border-white/10 text-white font-bold hover:bg-white/5 transition-all"
+                className="flex-1 py-5 rounded-2xl border border-white/10 text-white font-bold hover:bg-white/5 transition-all text-sm uppercase tracking-widest font-mono"
               >
                 {t.back}
               </button>
               <button
                 type="submit"
-                className="flex-[2] py-5 rounded-2xl bg-gradient-to-r from-accent to-[#8b7cf8] text-white font-display font-bold text-base shadow-[0_8px_32px_rgba(108,99,255,0.3)] hover:-translate-y-1 transition-all active:translate-y-0"
+                className="flex-1 py-5 rounded-2xl bg-gradient-to-r from-accent to-[#8b7cf8] text-white font-display font-bold text-base shadow-[0_8px_32px_rgba(108,99,255,0.3)] hover:-translate-y-0.5 transition-all"
               >
                 {t.findInternships}
               </button>

@@ -21,6 +21,10 @@ export default function LoginPage() {
 
   const [showPassword, setShowPassword] = useState(false);
 
+  const handleGoogleLogin = () => {
+    alert("Google Login is being integrated with your workspace. This feature will be live shortly!");
+  };
+
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-[#0a0a0f] overflow-hidden">
       {/* Left Panel - Decorative (Hidden on mobile) */}
@@ -38,7 +42,7 @@ export default function LoginPage() {
           </Link>
 
           <h1 className="text-[56px] font-display font-bold text-white leading-[1.1] mb-8 tracking-tight">
-            Elevate your <br/><span className="text-gradient">career trajectory</span> with AI.
+            Elevate your <br/><span className="text-gradient">career trajectory</span><br/>with AI.
           </h1>
 
           <div className="space-y-6">
@@ -65,7 +69,7 @@ export default function LoginPage() {
       </div>
 
       {/* Right Panel - Form Center */}
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-12 relative">
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-12 relative bg-mesh">
         <div className="w-full max-w-[420px] animate-fadeIn">
           <div className="mb-10 lg:hidden">
             <Link to="/" className="inline-flex items-center gap-2">
@@ -74,7 +78,7 @@ export default function LoginPage() {
             </Link>
           </div>
 
-          <header className="mb-10">
+          <header className="mb-10 text-center lg:text-left">
             <h2 className="text-[36px] font-display font-bold text-white mb-3">Welcome back</h2>
             <p className="text-[#5a5a78] font-medium">Continue your journey to the perfect internship.</p>
           </header>
@@ -136,15 +140,18 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-8 flex items-center gap-4">
+          <div className="mt-8 flex items-center gap-4 px-2">
             <div className="h-[1px] flex-1 bg-white/5"></div>
-            <span className="text-[11px] font-mono font-bold text-[#5a5a78] uppercase tracking-widest">or continue with</span>
+            <span className="text-[11px] font-mono font-bold text-[#5a5a78] uppercase tracking-widest whitespace-nowrap">or continue with</span>
             <div className="h-[1px] flex-1 bg-white/5"></div>
           </div>
 
           <div className="mt-8">
-            <button className="w-full bg-[#1a1a28] border border-white/5 hover:border-white/10 rounded-2xl py-4 flex items-center justify-center gap-3 transition-all">
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
+            <button 
+              onClick={handleGoogleLogin}
+              className="w-full bg-white/5 border border-white/10 hover:border-white/20 hover:bg-white/10 rounded-2xl py-4 flex items-center justify-center gap-3 transition-all group"
+            >
+              <svg className="w-5 h-5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>

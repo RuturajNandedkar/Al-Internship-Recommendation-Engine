@@ -1,14 +1,14 @@
 import { useState, useCallback, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.tsx";
 import Header from "../components/Header.tsx";
 import CandidateForm from "../components/CandidateForm.tsx";
 import RecommendationList from "../components/RecommendationList.tsx";
-import ApiKeySetup from "../components/ApiKeySetup.tsx";
 import Footer from "../components/Footer.tsx";
+import OnboardingModal from "../components/OnboardingModal.tsx";
+import ApiKeySetup from "../components/ApiKeySetup.tsx";
 import { SkeletonList } from "../components/SkeletonCard.tsx";
 import ErrorBoundary from "../components/ErrorBoundary.tsx";
-import OnboardingModal from "../components/OnboardingModal.tsx";
 import { translations, skillKeyMap, TranslationContent } from "../data/translations.ts";
 import { getRecommendations } from "../engine/recommendationEngine";
 import { getAIRecommendations, isAIAvailable, CandidateProfile, FrontendRecommendation } from "../services/aiService";
@@ -25,11 +25,22 @@ export default function HomePage() {
   const { isAuthenticated } = useAuth();
   const [lang, setLang] = useState<string>("en");
   const [results, setResults] = useState<FrontendRecommendation[] | null>(null);
-  const [showResults, setShowResults] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const showResults = searchParams.get("view") === "results";
+  
   const [loading, setLoading] = useState(false);
   const [aiUsed, setAiUsed] = useState(false);
-  const [aiReady, setAiReady] = useState(isAIAvailable());
   const [userSkills, setUserSkills] = useState<string[]>([]);
+  const [aiReady, setAiReady] = useState(false);
+  const [showDemo, setShowDemo] = useState(false);
+
+  const setShowResults = (val: boolean) => {
+    setSearchParams(prev => {
+      if (val) prev.set("view", "results");
+      else prev.delete("view");
+      return prev;
+    });
+  };
 
   useScrollReveal();
 
@@ -127,15 +138,18 @@ export default function HomePage() {
                   {t.tagline || "Our advanced AI engine analyzes your unique skill set to match you with opportunities that align with your career goals and potential."}
                 </p>
 
-                {/* CTAs */}
+                 {/* CTAs */}
                 <div className="reveal flex flex-wrap items-center justify-center gap-5 pt-4">
                   <button 
                     onClick={() => document.getElementById('matching-form')?.scrollIntoView({ behavior: 'smooth' })}
-                    className="px-9 py-4 rounded-xl bg-accent text-white font-display font-bold text-base shadow-[0_8px_32px_rgba(108,99,255,0.3)] hover:-translate-y-0.5 transition-all hover:shadow-[0_12px_40px_rgba(108,99,255,0.4)]"
+                    className="min-w-[220px] px-9 py-4 rounded-xl bg-accent text-white font-display font-bold text-base shadow-[0_8px_32px_rgba(108,99,255,0.3)] hover:-translate-y-0.5 transition-all hover:shadow-[0_12px_40px_rgba(108,99,255,0.4)]"
                   >
                     Start Matching →
                   </button>
-                  <button className="flex items-center gap-3 px-9 py-4 rounded-xl border border-white/10 bg-white/5 font-display font-bold text-base text-white hover:bg-white/10 transition-all">
+                  <button 
+                    onClick={() => setShowDemo(true)}
+                    className="min-w-[220px] flex items-center justify-center gap-3 px-9 py-4 rounded-xl border border-white/10 bg-white/5 font-display font-bold text-base text-white hover:bg-white/10 transition-all"
+                  >
                     <div className="w-5 h-5 flex items-center justify-center rounded-full bg-white/10">
                       <svg className="w-2.5 h-2.5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                     </div>
@@ -169,11 +183,9 @@ export default function HomePage() {
             </section>
 
             {/* Matching Section (Candidate Form) */}
-            <section id="matching-form" className="reveal w-full max-w-2xl px-5 py-20">
+            <section id="matching-form" className="reveal w-full max-w-4xl px-5 py-20 translate-y-[-100px]">
               <ApiKeySetup t={t} onKeySet={(ready: boolean = false) => setAiReady(ready)} />
-              <div className="card-premium p-7 sm:p-10 shadow-card">
-                <CandidateForm t={t} onSubmit={handleSubmit} />
-              </div>
+              <CandidateForm t={t} onSubmit={handleSubmit} />
             </section>
           </div>
         ) : (
@@ -200,6 +212,32 @@ export default function HomePage() {
 
       <Footer t={t} />
       <OnboardingModal />
+
+      {/* Demo Video Modal */}
+      {showDemo && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-[#0a0a0f]/80 backdrop-blur-xl" onClick={() => setShowDemo(false)} />
+          <div className="relative w-full max-w-4xl aspect-video bg-[#12121c] border border-white/10 rounded-[32px] overflow-hidden shadow-2xl animate-zoomIn">
+            <button 
+              onClick={() => setShowDemo(false)}
+              className="absolute top-6 right-6 z-20 w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-all shadow-lg border border-white/10"
+            >
+              ✕
+            </button>
+            <div className="absolute inset-0">
+              <iframe 
+                className="w-full h-full"
+                src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1" 
+                title="Platform Demo"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-[#12121c] to-transparent pointer-events-none" />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
