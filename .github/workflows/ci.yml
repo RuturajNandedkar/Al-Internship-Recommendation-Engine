@@ -27,7 +27,7 @@ jobs:
       run: npm install --legacy-peer-deps
 
     - name: Run Frontend Lint
-      run: npm run lint
+      run: npx eslint src --ext .ts,.tsx
       continue-on-error: true
 
     - name: Run Frontend Tests
@@ -42,7 +42,7 @@ jobs:
 
     - name: Run Backend Lint
       working-directory: ./backend
-      run: npm run lint
+      run: npx eslint . --ext .ts
       continue-on-error: true
 
     - name: Run Backend Tests
