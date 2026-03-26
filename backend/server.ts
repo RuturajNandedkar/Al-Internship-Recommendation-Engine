@@ -28,7 +28,9 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // ─── Connect to MongoDB ─────────────────────────────────────────────────────
-connectDB();
+if (process.env.NODE_ENV !== "test") {
+  connectDB();
+}
 
 // ─── Global Middleware ──────────────────────────────────────────────────────
 
@@ -241,9 +243,11 @@ app.use(errorHandler);
 
 // ─── Start Server ───────────────────────────────────────────────────────────
 
-app.listen(PORT, () => {
-  logger.info(`Server running on http://localhost:${PORT}`);
-  logger.info(`Environment: ${process.env.NODE_ENV || "development"}`);
-});
+if (process.env.NODE_ENV !== "test") {
+  app.listen(PORT, () => {
+    logger.info(`Server running on http://localhost:${PORT}`);
+    logger.info(`Environment: ${process.env.NODE_ENV || "development"}`);
+  });
+}
 
 export default app;
