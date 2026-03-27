@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "type": "commonjs",
   "description": "Backend API for AI Internship Recommendation Engine",
-  "main": "server.js",
+  "main": "dist/server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node dist/server.js",
     "dev": "nodemon --exec ts-node --transpile-only server.ts",
     "seed": "node utils/seedData.js",
     "test": "jest",
