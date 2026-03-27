@@ -13,7 +13,7 @@ if (REDIS_ENABLED) {
       lazyConnect: true,
       maxRetriesPerRequest: 1,
       connectTimeout: 3000,
-      retryStrategy: () => null,
+      retryStrategy: (): any => null,
     });
 
     redisClient.on("connect", (): void => {
