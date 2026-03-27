@@ -33,13 +33,31 @@ import skillGapRoutes from "./routes/skillGapRoutes";
 import aiRoutes from "./routes/aiRoutes";
 import resumeRoutes from "./routes/resumeRoutes";
 
+// Seeding imports
+import Internship from "./models/Internship";
+import seedData from "./data/sampleInternships.json";
+
 // ─── Initialize Express ─────────────────────────────────────────────────────
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // ─── Connect to MongoDB ─────────────────────────────────────────────────────
+async function autoSeed() {
+  try {
+    const count = await Internship.countDocuments();
+    if (count === 0) {
+      await Internship.insertMany(seedData);
+      console.log("✅ Auto-seeded 50 internships");
+    }
+  } catch (error) {
+    console.error("❌ Auto-seeding error:", error);
+  }
+}
+
 if (process.env.NODE_ENV !== "test") {
-  connectDB();
+  connectDB().then(() => {
+    autoSeed();
+  });
 }
 
 // ─── Global Middleware ──────────────────────────────────────────────────────
