@@ -51,17 +51,18 @@ router.get("/me", protect, getMe);
 // PUT /api/auth/me (protected)
 router.put("/me", protect, updateMe);
 
-router.get('/google', passport.authenticate('google', { 
-  scope: ['profile', 'email'],
-  session: false 
-}));
+router.get('/google', (req, res, next) => {
+  passport.authenticate('google', { 
+    scope: ['profile', 'email'],
+    session: false 
+  })(req, res, next);
+});
 
 router.get('/google/callback', 
-  passport.authenticate('google', { session: false, failureRedirect: '/login' }),
-  (req, res) => {
-    const user = req.user as any;
+  passport.authenticate('google', { session: false, failureRedirect: `${process.env.FRONTEND_URL}/login` }),
+  (req: any, res) => {
     const token = jwt.sign(
-      { id: user._id, email: user.email },
+      { id: req.user._id, email: req.user.email, name: req.user.name },
       process.env.JWT_SECRET!,
       { expiresIn: '7d' }
     );

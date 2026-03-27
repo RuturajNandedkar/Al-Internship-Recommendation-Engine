@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
-import passport from './config/passport';
+import './config/passport';
+import passport from 'passport';
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
