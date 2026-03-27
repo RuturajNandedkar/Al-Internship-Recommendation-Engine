@@ -11,7 +11,9 @@ interface JwtPayload {
 }
 
 export interface AuthRequest extends Request {
-  user?: IUser;
+  user?: any;
+  body: any;
+  query: any;
 }
 
 /**
