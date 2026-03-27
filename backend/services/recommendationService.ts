@@ -74,6 +74,7 @@ export interface RecommendationMetadata {
   averageScore: number;
   topDomains: string[];
   timestamp: string;
+  isFallback?: boolean;
 }
 
 // ─── Constants ──────────────────────────────────────────────────────────────
@@ -445,10 +446,35 @@ async function getRecommendations(
       b.breakdown.skill_match - a.breakdown.skill_match
   );
 
-  const minResults = Math.min(3, scored.length);
+  const minResults = Math.min(5, scored.length);
   const top = scored.slice(0, Math.max(minResults, maxResults));
-  const filtered = top.filter((r) => r.score >= 10);
-  const results = filtered.length >= minResults ? filtered : top.slice(0, minResults);
+  const filtered = top.filter((r) => r.score >= 1);
+  let results = filtered.length >= minResults ? filtered : top.slice(0, minResults);
+
+  // 3. Fallback: if 0 results, return top 10 most recent internships
+  let isFallback = false;
+  if (results.length === 0) {
+    logger.info("No recommendations found above threshold, falling back to recent internships");
+    const recent = await Internship.find({}).sort({ createdAt: -1 }).limit(10).lean();
+    results = recent.map((r) => ({
+      ...r,
+      score: 0,
+      breakdown: {
+        skill_match: 0,
+        domain_match: 0,
+        interest_match: 0,
+        location_match: 0,
+        experience_fit: 0,
+        recency: 100,
+      },
+      confidence: 0,
+      matchedSkills: [] as string[],
+      missingSkills: [] as string[],
+      reasoning: "These are general recommendations based on the most recent postings because no exact matches were found for your profile.",
+      isFallback: true,
+    })) as RecommendationResult[];
+    isFallback = true;
+  }
 
   const metadata: RecommendationMetadata = {
     totalInternships: internships.length,
@@ -458,6 +484,7 @@ async function getRecommendations(
     averageScore: Math.round(results.reduce((s, r) => s + r.score, 0) / results.length),
     topDomains: [...new Set(results.map((r) => r.domain).filter(Boolean) as string[])],
     timestamp: new Date().toISOString(),
+    isFallback,
   };
   logger.info("Recommendations generated", {
     profile: { skills: skills.length, domain: preferred_domain, level: experience_level },
