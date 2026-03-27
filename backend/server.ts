@@ -8,6 +8,15 @@ import mongoose from "mongoose";
 
 dotenv.config();
 
+// ─── Environment Variable Validation ────────────────────────────────────────
+const REQUIRED_ENV_VARS = ["MONGODB_URI", "JWT_SECRET", "GEMINI_API_KEY"] as const;
+for (const key of REQUIRED_ENV_VARS) {
+  if (!process.env[key]) {
+    console.error(`❌ Missing required environment variable: ${key}`);
+    process.exit(1);
+  }
+}
+
 import connectDB from "./config/db";
 import errorHandler from "./middleware/errorHandler";
 import logger from "./utils/logger";

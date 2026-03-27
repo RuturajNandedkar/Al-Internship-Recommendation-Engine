@@ -3,11 +3,8 @@ import jwt from "jsonwebtoken";
 import User, { IUser } from "../models/User";
 import AppError from "../utils/AppError";
 
-const JWT_SECRET = process.env.JWT_SECRET;
-
-if (!JWT_SECRET && process.env.NODE_ENV === "production") {
-  throw new Error("JWT_SECRET environment variable must be set in production");
-}
+// JWT_SECRET is validated at server startup (server.ts) — safe to assert non-null here
+const JWT_SECRET = process.env.JWT_SECRET!;
 
 interface JwtPayload {
   id: string;
@@ -36,7 +33,7 @@ export const protect = async (req: AuthRequest, _res: Response, next: NextFuncti
     }
 
     // Verify token
-    const decoded = jwt.verify(token, JWT_SECRET || "dev-secret-change-me") as JwtPayload;
+    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
 
     // Attach user (exclude password)
     const user = await User.findById(decoded.id).select("-password");
@@ -66,7 +63,7 @@ export const optionalAuth = async (req: AuthRequest, _res: Response, next: NextF
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith("Bearer ")) {
       const token = authHeader.split(" ")[1];
-      const decoded = jwt.verify(token, JWT_SECRET || "dev-secret-change-me") as JwtPayload;
+      const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
       req.user = (await User.findById(decoded.id).select("-password")) as IUser;
     }
   } catch {
@@ -92,7 +89,7 @@ export const authorize = (...roles: string[]) => {
  * Generate a signed JWT for a user.
  */
 export const generateToken = (userId: string): string => {
-  return jwt.sign({ id: userId }, (JWT_SECRET || "dev-secret-change-me") as jwt.Secret, {
+  return jwt.sign({ id: userId }, JWT_SECRET as jwt.Secret, {
     expiresIn: (process.env.JWT_EXPIRES_IN || "7d") as any,
   });
 };
