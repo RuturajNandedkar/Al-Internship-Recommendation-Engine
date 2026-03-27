@@ -12,8 +12,10 @@ export interface IUserMethods {
 export interface IUser extends Document, IUserMethods {
   name: string;
   email: string;
-  password: string;
+  password?: string;
   role: UserRole;
+  googleId?: string;
+  avatar?: string;
   profile?: Types.ObjectId;
   resumeText: string;
   resumeFileName: string;
@@ -44,9 +46,17 @@ const userSchema = new Schema<IUser, UserModel, IUserMethods>(
     },
     password: {
       type: String,
-      required: [true, "Password is required"],
+      required: false,
       minlength: [8, "Password must be at least 8 characters"],
       select: false,
+    },
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    avatar: {
+      type: String,
     },
     role: {
       type: String,
@@ -74,7 +84,7 @@ const userSchema = new Schema<IUser, UserModel, IUserMethods>(
 
 // Hash password before saving
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+  if (!this.isModified("password") || !this.password) return next();
   this.password = await bcrypt.hash(this.password, 12);
   next();
 });

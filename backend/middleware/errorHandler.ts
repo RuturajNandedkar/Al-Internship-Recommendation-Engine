@@ -42,7 +42,7 @@ const errorHandler = (err: any, req: Request, res: Response, _next: NextFunction
     method: req.method,
     url: req.originalUrl,
     ip: req.ip,
-    userId: req.user?._id,
+    userId: (req.user as any)?._id,
   };
 
   if (statusCode >= 500) {
