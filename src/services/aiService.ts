@@ -74,6 +74,8 @@ export interface FrontendRecommendation {
   matchedSkills?: string[];
   missingSkills?: string[];
   application_link?: string;
+  aiEnhanced?: boolean;
+  isFallback?: boolean;
   breakdown: BreakdownScores;
 }
 

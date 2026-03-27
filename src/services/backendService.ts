@@ -1,5 +1,7 @@
 import { skillKeyMap, stateKeyMap, fieldSectorMap } from "../data/translations.ts";
 import type { CandidateProfile, FrontendRecommendation, BreakdownScores } from "./aiService";
+import { getRecommendations as getLocalRecommendations } from "../engine/recommendationEngine.ts";
+
 
 // ─── Interfaces ─────────────────────────────────────────────────────────────
 
@@ -191,34 +193,66 @@ export interface RecommendedResultsArray extends Array<FrontendRecommendation> {
  * @returns recommendations shaped for RecommendationCard
  */
 export async function getBackendRecommendations(formData: CandidateProfile): Promise<RecommendedResultsArray> {
-  const payload = transformFormToBackend(formData);
+  try {
+    const payload = transformFormToBackend(formData);
 
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  const token = localStorage.getItem("ire_auth_token");
-  if (token) headers["Authorization"] = `Bearer ${token}`;
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    const token = localStorage.getItem("ire_auth_token");
+    if (token) headers["Authorization"] = `Bearer ${token}`;
 
-  const res = await fetch(`${BACKEND_URL}/api/recommendations`, {
-    method: "POST",
-    headers,
-    body: JSON.stringify(payload),
-  });
+    const res = await fetch(`${BACKEND_URL}/api/recommendations`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload),
+    });
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || `Backend error: ${res.status}`);
+    if (!res.ok) {
+      throw new Error(`Backend error: ${res.status}`);
+    }
+
+    const json = (await res.json()) as BackendResponseData;
+
+    if (!json.success || !Array.isArray(json.data) || json.data.length === 0) {
+      console.warn("Backend returned 0 results or failed, falling back to local engine");
+      return getLocalFallback(formData);
+    }
+
+    const results: RecommendedResultsArray = json.data.map(transformBackendResult);
+    results._aiUsed = !!json.aiUsed;
+
+    return results;
+  } catch (error) {
+    console.error("Backend request failed, falling back to local engine:", error);
+    return getLocalFallback(formData);
   }
+}
 
-  const json = (await res.json()) as BackendResponseData;
+/**
+ * Fallback to local recommendation engine when backend is unavailable or empty.
+ */
+function getLocalFallback(formData: CandidateProfile): RecommendedResultsArray {
+  // Ensure we get at least 5 results from the local engine if possible
+  const localResults = getLocalRecommendations(formData, 10);
+  
+  const results: RecommendedResultsArray = localResults.map((item, index) => ({
+    id: String(item.id || index + 1),
+    title: item.title,
+    company: item.company,
+    sector: item.sector,
+    location: item.location,
+    state: item.state,
+    duration: item.duration,
+    stipend: item.stipend,
+    mode: item.mode as any,
+    skills: item.skills,
+    education: item.education as string[],
+    description: item.description,
+    score: item.score,
+    reasoning: "Showing local recommendation as a fallback.",
+    breakdown: item.breakdown,
+  }));
 
-  if (!json.success || !Array.isArray(json.data)) {
-    throw new Error("Unexpected response format from backend");
-  }
-
-  const results: RecommendedResultsArray = json.data.map(transformBackendResult);
-
-  // Attach AI usage flag from backend response
-  results._aiUsed = !!json.aiUsed;
-
+  results._aiUsed = false;
   return results;
 }
 
