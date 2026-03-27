@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import redis from "../config/redis";
+import { redisClient, redisAvailable } from "../config/redis";
 import crypto from "crypto";
 import logger from "../utils/logger";
 
@@ -94,8 +94,8 @@ async function generateAIRecommendation(
   const cacheKey = `ai:recommendations:${profileHash}`;
 
   try {
-    if (redis.status === "ready") {
-      const cached = await redis.get(cacheKey);
+    if (redisClient && redisAvailable) {
+      const cached = await redisClient.get(cacheKey);
       if (cached) {
         logger.info("Serving AI recommendations from cache", { profileHash });
         return JSON.parse(cached);
@@ -175,8 +175,8 @@ Requirements:
 
   // 2. Save to Redis Cache (1 hour)
   try {
-    if (redis.status === "ready") {
-      await redis.set(cacheKey, JSON.stringify(parsed), "EX", 3600);
+    if (redisClient && redisAvailable) {
+      await redisClient.set(cacheKey, JSON.stringify(parsed), "EX", 3600);
       logger.info("AI recommendations cached", { profileHash });
     }
   } catch (err: any) {

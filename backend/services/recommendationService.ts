@@ -1,6 +1,6 @@
 import Internship, { IInternship } from "../models/Internship";
 import logger from "../utils/logger";
-import redis from "../config/redis";
+import { redisClient, redisAvailable } from "../config/redis";
 import crypto from "crypto";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -373,14 +373,12 @@ async function getRecommendations(
 
   // 2. Try to get from cache
   try {
-    if (redis.status === "ready") {
-      const cached = await redis.get(cacheKey);
+    if (redisClient && redisAvailable) {
+      const cached = await redisClient.get(cacheKey);
       if (cached) {
         logger.info("Serving recommendations from cache", { profileHash });
         return JSON.parse(cached);
       }
-    } else {
-      logger.warn("Redis not ready, skipping cache get", { status: redis.status });
     }
   } catch (err: any) {
     logger.error("Redis cache get error", { error: err.message });
@@ -469,10 +467,8 @@ async function getRecommendations(
 
   // 3. Save to cache (30 minutes)
   try {
-    if (redis.status === "ready") {
-      await redis.set(cacheKey, JSON.stringify(results), "EX", 30 * 60);
-    } else {
-      logger.warn("Redis not ready, skipping cache set", { status: redis.status });
+    if (redisClient && redisAvailable) {
+      await redisClient.set(cacheKey, JSON.stringify(results), "EX", 30 * 60);
     }
   } catch (err: any) {
     logger.error("Redis cache set error", { error: err.message });

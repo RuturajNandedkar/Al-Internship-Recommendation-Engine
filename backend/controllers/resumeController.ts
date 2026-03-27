@@ -10,7 +10,7 @@ import { AuthRequest } from "../middleware/auth";
 import asyncHandler from "../middleware/asyncHandler";
 import AppError from "../utils/AppError";
 import logger from "../utils/logger";
-import { resumeQueue } from "../queues/resumeQueue";
+import { resumeQueue, isQueueActive, processResumeJobLogic } from "../queues/resumeQueue";
 import { Job } from "bullmq";
 
 // Multer config — store in memory, accept PDF only, max 5MB
@@ -63,24 +63,45 @@ export const uploadResume = asyncHandler(async (req: AuthRequest, res: Response)
     throw AppError.badRequest("Resume appears to be empty or too short. Please upload a text-based PDF.");
   }
 
-  // Enqueue parsing job
-  const job = await resumeQueue.add("parse-resume", {
+  // Enqueue parsing job or process synchronously if Redis is missing
+  if (isQueueActive && resumeQueue) {
+    const job = await resumeQueue.add("parse-resume", {
+      userId: req.user?._id,
+      resumeText,
+      fileName: req.file.originalname,
+      type: "keyword", // standard extraction
+    });
+
+    logger.info("Resume enqueued for parsing", {
+      user: req.user?._id,
+      jobId: job.id,
+    });
+
+    return res.status(202).json({
+      success: true,
+      message: "Resume upload successful. Processing in background.",
+      data: {
+        jobId: job.id,
+      },
+    });
+  }
+
+  // Synchronous Fallback
+  logger.info("Redis unavailable, processing resume synchronously", {
+    user: req.user?._id,
+  });
+  const result = await processResumeJobLogic({
     userId: req.user?._id,
     resumeText,
     fileName: req.file.originalname,
-    type: "keyword", // standard extraction
+    type: "keyword",
   });
 
-  logger.info("Resume enqueued for parsing", {
-    user: req.user?._id,
-    jobId: job.id,
-  });
-
-  res.status(202).json({
+  return res.status(200).json({
     success: true,
-    message: "Resume upload successful. Processing in background.",
+    message: "Resume upload and processing successful.",
     data: {
-      jobId: job.id,
+      result,
     },
   });
 });
@@ -134,24 +155,45 @@ async function parsePdfFromRequest(req: AuthRequest, res: Response) {
 export const analyzeAndRecommend = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { resumeText, fileName } = await parsePdfFromRequest(req, res);
 
-  // Enqueue AI parsing job
-  const job = await resumeQueue.add("parse-resume-ai", {
+  // Enqueue AI parsing job or process synchronously
+  if (isQueueActive && resumeQueue) {
+    const job = await resumeQueue.add("parse-resume-ai", {
+      userId: req.user?._id,
+      resumeText,
+      fileName,
+      type: "ai", // AI-powered extraction
+    });
+
+    logger.info("Resume enqueued for AI analysis", {
+      user: req.user?._id,
+      jobId: job.id,
+    });
+
+    return res.status(202).json({
+      success: true,
+      message: "AI Resume analysis started. Processing in background.",
+      data: {
+        jobId: job.id,
+      },
+    });
+  }
+
+  // Synchronous Fallback
+  logger.info("Redis unavailable, analyzing resume synchronously", {
+    user: req.user?._id,
+  });
+  const result = await processResumeJobLogic({
     userId: req.user?._id,
     resumeText,
     fileName,
-    type: "ai", // AI-powered extraction
+    type: "ai",
   });
 
-  logger.info("Resume enqueued for AI analysis", {
-    user: req.user?._id,
-    jobId: job.id,
-  });
-
-  res.status(202).json({
+  return res.status(200).json({
     success: true,
-    message: "AI Resume analysis started. Processing in background.",
+    message: "AI Resume analysis and processing successful.",
     data: {
-      jobId: job.id,
+      result,
     },
   });
 });
@@ -163,6 +205,11 @@ export const analyzeAndRecommend = asyncHandler(async (req: AuthRequest, res: Re
  */
 export const getJobStatus = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { jobId } = req.params;
+
+  if (!isQueueActive || !resumeQueue) {
+    throw AppError.badRequest("Background processing is disabled (Redis unavailable).");
+  }
+
   const job = await Job.fromId(resumeQueue, jobId as string);
 
   if (!job) {
