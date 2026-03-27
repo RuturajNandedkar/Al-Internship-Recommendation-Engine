@@ -1,32 +1,35 @@
-import Redis from "ioredis";
 import logger from "../utils/logger";
 
-const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
+const REDIS_URL = process.env.REDIS_URL;
+export const REDIS_ENABLED = !!REDIS_URL;
 
-let redisClient: Redis | null = null;
+let redisClient: any = null;
 let redisAvailable = false;
 
-try {
-  redisClient = new Redis(REDIS_URL, {
-    lazyConnect: true,
-    maxRetriesPerRequest: 1, // Reduced for faster failure detection
-    connectTimeout: 3000,
-    retryStrategy: () => null, // Don't retry indefinitely
-  });
+if (REDIS_ENABLED) {
+  try {
+    const Redis = require("ioredis");
+    redisClient = new Redis(REDIS_URL, {
+      lazyConnect: true,
+      maxRetriesPerRequest: 1,
+      connectTimeout: 3000,
+      retryStrategy: () => null,
+    });
 
-  redisClient.on("connect", () => {
-    redisAvailable = true;
-    logger.info("Redis connected successfully");
-  });
+    redisClient.on("connect", (): void => {
+      redisAvailable = true;
+      logger.info("Redis connected successfully");
+    });
 
-  redisClient.on("error", (err) => {
+    redisClient.on("error", (err: any): void => {
+      redisAvailable = false;
+      logger.error("Redis connection error", { error: err.message });
+    });
+  } catch (error: any) {
+    redisClient = null;
     redisAvailable = false;
-    logger.error("Redis connection error", { error: err.message });
-  });
-} catch (error: any) {
-  redisClient = null;
-  redisAvailable = false;
-  logger.error("Failed to initialize Redis client", { error: error.message });
+    logger.error("Failed to initialize Redis client", { error: error.message });
+  }
 }
 
 export { redisClient, redisAvailable };

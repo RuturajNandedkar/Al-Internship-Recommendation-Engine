@@ -11,7 +11,6 @@ import asyncHandler from "../middleware/asyncHandler";
 import AppError from "../utils/AppError";
 import logger from "../utils/logger";
 import { resumeQueue, isQueueActive, processResumeJobLogic } from "../queues/resumeQueue";
-import { Job } from "bullmq";
 
 // Multer config — store in memory, accept PDF only, max 5MB
 const upload = multer({
@@ -210,6 +209,7 @@ export const getJobStatus = asyncHandler(async (req: AuthRequest, res: Response)
     throw AppError.badRequest("Background processing is disabled (Redis unavailable).");
   }
 
+  const { Job } = require("bullmq");
   const job = await Job.fromId(resumeQueue, jobId as string);
 
   if (!job) {

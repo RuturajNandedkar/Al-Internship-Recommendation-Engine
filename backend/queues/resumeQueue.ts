@@ -1,5 +1,4 @@
-import { Queue, Worker, Job } from "bullmq";
-import { redisClient } from "../config/redis";
+import { redisClient, REDIS_ENABLED } from "../config/redis";
 import logger from "../utils/logger";
 import { extractProfileFromResume, getFullResumeAnalysis } from "../services/resumeService";
 import { getRecommendations } from "../services/recommendationService";
@@ -8,7 +7,6 @@ import Profile from "../models/Profile";
 import RecommendationHistory from "../models/RecommendationHistory";
 
 const QUEUE_NAME = "resume-parsing";
-const REDIS_URL = process.env.REDIS_URL;
 
 /**
  * Core resume processing logic - shared between background worker and synchronous fallback.
@@ -85,32 +83,48 @@ export const processResumeJobLogic = async (data: any) => {
   }
 };
 
-// 1. Initialize Queue (Only if Redis is available)
-export const isQueueActive = !!REDIS_URL;
-export const resumeQueue = isQueueActive
-  ? new Queue(QUEUE_NAME, { connection: redisClient! })
-  : null;
+// 1. Initialize Queue (Only if Redis is enabled)
+export const isQueueActive = REDIS_ENABLED;
+let resumeQueueRef: any = null;
 
-// 2. Initialize Worker (Only if Redis is available)
-export const resumeWorker = isQueueActive
-  ? new Worker(
+if (REDIS_ENABLED) {
+  try {
+    const { Queue } = require("bullmq");
+    resumeQueueRef = new Queue(QUEUE_NAME, { connection: redisClient! });
+  } catch (error: any) {
+    logger.error("Failed to initialize BullMQ Queue", { error: error.message });
+  }
+}
+
+export const resumeQueue = resumeQueueRef;
+
+// 2. Initialize Worker (Only if Redis is enabled)
+let resumeWorkerRef: any = null;
+
+if (REDIS_ENABLED) {
+  try {
+    const { Worker } = require("bullmq");
+    resumeWorkerRef = new Worker(
       QUEUE_NAME,
-      async (job: Job) => {
+      async (job: any) => {
         return processResumeJobLogic(job.data);
       },
       {
         connection: redisClient!,
         concurrency: 5,
       }
-    )
-  : null;
+    );
 
-if (resumeWorker) {
-  resumeWorker.on("completed", (job) => {
-    logger.info(`Job ${job.id} completed successfully`);
-  });
+    resumeWorkerRef.on("completed", (job: any) => {
+      logger.info(`Job ${job.id} completed successfully`);
+    });
 
-  resumeWorker.on("failed", (job, err) => {
-    logger.error(`Job ${job?.id} failed`, { error: err.message });
-  });
+    resumeWorkerRef.on("failed", (job: any, err: Error) => {
+      logger.error(`Job ${job?.id} failed`, { error: err.message });
+    });
+  } catch (error: any) {
+    logger.error("Failed to initialize BullMQ Worker", { error: error.message });
+  }
 }
+
+export const resumeWorker = resumeWorkerRef;
