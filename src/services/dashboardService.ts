@@ -133,7 +133,7 @@ export interface ResumeUploadData {
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
 function getToken(): string | null {
-  return localStorage.getItem("ire_auth_token");
+  return localStorage.getItem("authToken");
 }
 
 function authHeaders(extra: Record<string, string> = {}): Record<string, string> {

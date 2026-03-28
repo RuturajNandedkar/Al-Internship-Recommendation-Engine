@@ -13,7 +13,7 @@ export default function LoginPage() {
     clearError();
     try {
       await login(email, password);
-      navigate("/dashboard");
+      navigate("/");
     } catch {
       // error is set in context
     }

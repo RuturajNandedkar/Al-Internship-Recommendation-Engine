@@ -27,7 +27,7 @@ export default function SignupPage() {
 
     try {
       await signup(name, email, password);
-      navigate("/dashboard");
+      navigate("/");
     } catch {
       // error is set in context
     }

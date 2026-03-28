@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback, ReactNode 
 import { useNavigate } from "react-router-dom";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
-const TOKEN_KEY = "ire_auth_token";
+const TOKEN_KEY = "authToken";
 const USER_KEY = "ire_auth_user";
 
 export interface User {

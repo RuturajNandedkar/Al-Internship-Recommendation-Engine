@@ -75,16 +75,16 @@ app.use(
 // Prevent parameter pollution
 app.disable("x-powered-by");
 
-// CORS — allow requests from the frontend origin
-const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173")
-  .split(",")
-  .map((o: string) => o.trim());
-
 app.use(
   cors({
-    origin: allowedOrigins,
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: [
+      'https://ai-internship-recommendation-engine.vercel.app',
+      'http://localhost:5173',
+      process.env.FRONTEND_URL || ''
+    ],
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
   })
 );
 

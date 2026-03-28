@@ -197,7 +197,7 @@ export async function getBackendRecommendations(formData: CandidateProfile): Pro
     const payload = transformFormToBackend(formData);
 
     const headers: Record<string, string> = { "Content-Type": "application/json" };
-    const token = localStorage.getItem("ire_auth_token");
+    const token = localStorage.getItem("authToken");
     if (token) headers["Authorization"] = `Bearer ${token}`;
 
     const res = await fetch(`${BACKEND_URL}/api/recommendations`, {

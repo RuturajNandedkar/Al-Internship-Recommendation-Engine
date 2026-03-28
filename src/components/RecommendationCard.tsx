@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext.tsx";
 import MatchPercentageRing from "./MatchPercentageRing.tsx";
 import AIExplanation from "./AIExplanation.tsx";
 import { FrontendRecommendation } from "../services/aiService";
@@ -12,6 +14,8 @@ interface RecommendationCardProps {
 
 export default function RecommendationCard({ internship, rank, t }: RecommendationCardProps) {
   const [isSaved, setIsSaved] = useState(false);
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
   // Helper to get initials or first letter
   const getLogoLetter = (name: string) => name.charAt(0).toUpperCase();
@@ -104,18 +108,27 @@ export default function RecommendationCard({ internship, rank, t }: Recommendati
           className={`flex-1 py-3 rounded-[8px] border font-body font-bold text-[13px] transition-all relative overflow-hidden uppercase tracking-wider
             ${isSaved ? "bg-accent/10 border-accent/30 text-accent btn-save-animate" : "border-white/10 text-[#9898b0] hover:bg-white/5"}
           `}
-          onClick={() => setIsSaved(!isSaved)}
+          onClick={() => {
+            if (!isAuthenticated) return navigate("/login");
+            setIsSaved(!isSaved);
+          }}
         >
           <div className="flex items-center justify-center gap-2">
-            <svg 
-              className={`w-3.5 h-3.5 transition-colors ${isSaved ? "fill-accent text-accent" : "text-[#9898b0]"}`} 
-              fill={isSaved ? "currentColor" : "none"} 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-            </svg>
-            <span>{isSaved ? "Saved" : "Save"}</span>
+            {!isAuthenticated ? (
+              <span className="text-accent2">Login to Save</span>
+            ) : (
+              <>
+                <svg 
+                  className={`w-3.5 h-3.5 transition-colors ${isSaved ? "fill-accent text-accent" : "text-[#9898b0]"}`} 
+                  fill={isSaved ? "currentColor" : "none"} 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                </svg>
+                <span>{isSaved ? "Saved" : "Save"}</span>
+              </>
+            )}
           </div>
         </button>
         <button 
