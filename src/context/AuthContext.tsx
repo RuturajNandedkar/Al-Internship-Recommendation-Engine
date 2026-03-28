@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 const TOKEN_KEY = "ire_auth_token";
@@ -39,8 +40,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(() => localStorage.getItem(TOKEN_KEY) || null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const isAuthenticated = !!token && !!user;
+
+  // Handle Google OAuth token from URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tokenParam = params.get('token');
+    if (tokenParam) {
+      setToken(tokenParam);
+      window.history.replaceState({}, '', window.location.pathname);
+      
+      // decode token to get user info
+      try {
+        const base64 = tokenParam.split('.')[1];
+        const decoded = JSON.parse(atob(base64));
+        setUser({ 
+          id: decoded.id || decoded.sub, 
+          email: decoded.email, 
+          name: decoded.name 
+        });
+      } catch(e) {
+        console.error("Failed to decode token", e);
+      }
+      navigate('/');
+    }
+  }, [navigate]);
 
   // Persist token/user to localStorage
   useEffect(() => {

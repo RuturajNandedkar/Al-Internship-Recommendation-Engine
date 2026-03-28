@@ -22,7 +22,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleGoogleLogin = () => {
-    alert("Google Login is being integrated with your workspace. This feature will be live shortly!");
+    window.location.href = `${import.meta.env.VITE_BACKEND_URL}/api/auth/google`;
   };
 
   return (
