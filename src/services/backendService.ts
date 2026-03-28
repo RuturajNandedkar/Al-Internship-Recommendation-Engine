@@ -270,3 +270,15 @@ export async function isBackendAvailable(): Promise<boolean> {
     return false;
   }
 }
+
+/**
+ * Keep the backend service alive (prevents Render free tier cold starts)
+ */
+export const keepBackendAlive = () => {
+  const ping = () => {
+    fetch(`${BACKEND_URL}/api/health`)
+      .catch(() => {});
+  };
+  ping(); // ping immediately on load
+  setInterval(ping, 14 * 60 * 1000); // ping every 14 minutes
+};
